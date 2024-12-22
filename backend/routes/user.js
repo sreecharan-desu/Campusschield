@@ -329,7 +329,6 @@ userRouter.put('/updateprofile', profileValidation, auth_user, async (req, res) 
     }
 });
 
-
 //error-handling-middleware
 userRouter.use((err, req, res, next) => {
     console.error('You have been caught up', err);
