@@ -34,11 +34,11 @@ const validateReport = (req, res, next) => {
             audio_link,
             whom_to_report
         });
-        if(validation.success) next();
+        if (validation.success) next();
         else {
-            const err = (validation.error.issues.map(err=>err.path[0]+ " " +err.message))
-            const sentence = err.map(e=>e).join(", ");
-            return res.status(400).json({ msg:sentence, success: false })
+            const err = (validation.error.issues.map(err => err.path[0] + " " + err.message));
+            const sentence = err.map(e => e).join(", ");
+            return res.status(400).json({ msg: sentence, success: false });
         };
     } catch (error) {
         res.status(400).json({ msg: error.toString(), success: false });

@@ -1,9 +1,11 @@
-const express = require('express');const userRouter = express.Router();
-const { User, Report, SirenAlert, Authorities, EmergencyContact} = require('../db/db');const jwt = require('jsonwebtoken');
+const express = require('express');
+const userRouter = express.Router();
+const jwt = require('jsonwebtoken');
+const { User, Report, SirenAlert, Authorities, EmergencyContact } = require('../db/db');
 const { validateInputs } = require('./middlewares/zod/inputValidation');
 const { auth_user, current_user } = require('./middlewares/usermiddlewares/auth-middleware');
 const { fecthUserDB } = require('./middlewares/usermiddlewares/signin-middleware');
-const {generate_JWT_key, JWT_KEY} = require('./middlewares/usermiddlewares/JWT/generate-auth-key');
+const { generate_JWT_key, JWT_KEY } = require('./middlewares/usermiddlewares/JWT/generate-auth-key');
 const { verifyUserExistence } = require('./middlewares/usermiddlewares/signup-middleware');
 const { generate_hashed_password } = require('./middlewares/usermiddlewares/hashfns/hash-password');
 const { getReports } = require('./middlewares/usermiddlewares/helperFNs/getReports');
@@ -11,19 +13,19 @@ const validateReport = require('./middlewares/zod/reportValidation');
 const profileValidation = require('./middlewares/zod/profileValidation');
 
 //routes
-userRouter.post('/signup', validateInputs, verifyUserExistence , async (req,res)=>{
-    const {username,college_email,password} = req.body;
+userRouter.post('/signup', validateInputs, verifyUserExistence, async (req, res) => {
+    const { username, college_email, password } = req.body;
     try {
         const response = await generate_hashed_password(password);
         if (response.success) {
             const user = await User.create({
                 Username: username,
-                CollegeEmail : email,
+                CollegeEmail: email,
                 Password: response.hashed_password
             });
             res.status(201).json({
                 msg: `Account created successfully with userId ${user._id},Signin to continue`,
-                success : true
+                success: true
             });
         } else {
             res.status(500).json({
@@ -36,161 +38,158 @@ userRouter.post('/signup', validateInputs, verifyUserExistence , async (req,res)
     }
 });
 
-userRouter.post('/signin', validateInputs, fecthUserDB, async(req,res)=>{
-    const {username} = req.body;
-    try{
-        const auth_token  = await  generate_JWT_key(username); 
-        const user = await User.findOne({   
-            Username : username
-        }); 
+userRouter.post('/signin', validateInputs, fecthUserDB, async (req, res) => {
+    const { username } = req.body;
+    try {
+        const auth_token = await generate_JWT_key(username);
+        const user = await User.findOne({
+            Username: username
+        });
 
         res.json({
-            user : {
-                id : user._id,
-                username : user.Username,
-                college_email : user.CollegeEmail,
-                personal_email : user.PersonalEmail || null,
-                phone : user.Phone || null,
-                address : user.Address || null,
-                college : user.College  || null,
-                course : user.Course || null,
-                year : user.Year  || null,                                                                                                                                                                                                               
-                blood_group : user.BloodGroup || null,
-                medical_conditions : user.MedicalConditions || null,
-                allergies : user.Allergies || null,
-                medications : user.Medications || null,
-                emergency_contact : user.EmergencyContact || null,
-                emergency_phone : user.EmergencyPhone || null,
-                created_at : user.createdAt
+            user: {
+                id: user._id,
+                username: user.Username,
+                college_email: user.CollegeEmail,
+                personal_email: user.PersonalEmail || null,
+                phone: user.Phone || null,
+                address: user.Address || null,
+                college: user.College || null,
+                course: user.Course || null,
+                year: user.Year || null,
+                blood_group: user.BloodGroup || null,
+                medical_conditions: user.MedicalConditions || null,
+                allergies: user.Allergies || null,
+                medications: user.Medications || null,
+                emergency_contact: user.EmergencyContact || null,
+                emergency_phone: user.EmergencyPhone || null,
+                created_at: user.createdAt
             },
-            token : auth_token,
-            success : true
+            token: auth_token,
+            success: true
         })
-    }
-    catch(e){
+    } catch (e) {
         res.json({
-            error : e,
-            msg : 'Error while generating auth_token Please Try again!',
-            success : false
+            error: e,
+            msg: 'Error while generating auth_token Please Try again!',
+            success: false
         })
     }
 });
 
 //(get) -end points
-userRouter.get('/getreports',auth_user,async(req,res)=>{
+userRouter.get('/getreports', auth_user, async (req, res) => {
     //returns all the reports of the user
-    try{
+    try {
         const authorization = req.headers.authorization;
         const token = authorization.split(' ')[1];  // removing the Bearer
-        const username = jwt.verify(token,JWT_KEY);
-        const Current_user  = await current_user(username)
-        if(Current_user == null){
+        const username = jwt.verify(token, JWT_KEY);
+        const Current_user = await current_user(username)
+        if (Current_user == null) {
             return res.json({
-                msg : 'FATAL : User not found',
-                success : false
+                msg: 'FATAL : User not found',
+                success: false
             })
-        }else{
+        } else {
             const reports = await getReports(Current_user._id);
             res.json({
                 reports,
-                success : true
+                success: true
             })
         }
-    }
-    catch(e){
+    } catch (e) {
         res.json({
-            msg : 'An error occurred while fetching the reports',
-            success : false
+            msg: 'An error occurred while fetching the reports',
+            success: false
         })
     }
 });
 
 //(post -endpoints)
-userRouter.post('/createreport',validateReport,auth_user,async(req,res)=>{
-    const {title,description,location,dateTime,harasser,video_link,image_link,audio_link,whom_to_report} = req.body;
+userRouter.post('/createreport', validateReport, auth_user, async (req, res) => {
+    const { title, description, location, dateTime, harasser, video_link, image_link, audio_link, whom_to_report } = req.body;
 
-    try{
+    try {
         const authorization = req.headers.authorization;
-    const token = authorization.split(' ')[1];  // removing the Bearer
-    const username = await jwt.verify(token,JWT_KEY);
-    const Current_user  = await current_user(username);
+        const token = authorization.split(' ')[1];  // removing the Bearer
+        const username = await jwt.verify(token, JWT_KEY);
+        const Current_user = await current_user(username);
 
-    const report = await Report.create({
-        userId : Current_user._id,
-        Title : title,
-        Description : description,
-        Status : 'Pending',
-        Time : dateTime,
-        Location : {
-            latitude : location.latitude,
-            longitude : location.longitude
-        },
-        HarasserDetails : harasser,
-        VideoLink : video_link || 'No Video',
-        ImageLink : image_link || 'No Image',
-        AudioLink : audio_link || 'No Audio',
-        WhomToReport : whom_to_report || 'Unknown'
-    });
+        const report = await Report.create({
+            userId: Current_user._id,
+            Title: title,
+            Description: description,
+            Status: 'Pending',
+            Time: dateTime,
+            Location: {
+                latitude: location.latitude,
+                longitude: location.longitude
+            },
+            HarasserDetails: harasser,
+            VideoLink: video_link || 'No Video',
+            ImageLink: image_link || 'No Image',
+            AudioLink: audio_link || 'No Audio',
+            WhomToReport: whom_to_report || 'Unknown'
+        });
 
-    res.json({
-        msg : `Report created successfully with id:${report._id}`,
-        success : true
-    })
-    }
-    catch(e){
         res.json({
-            msg : 'An error occurred while creating the report',
-            success : false
+            msg: `Report created successfully with id:${report._id}`,
+            success: true
+        })
+    } catch (e) {
+        res.json({
+            msg: 'An error occurred while creating the report',
+            success: false
         })
     }
-    
+
 });
 
 //unAuth Services
-userRouter.post('/sendsiren',async(req,res)=>{
+userRouter.post('/sendsiren', async (req, res) => {
     //sends siren alert to the user
-    const {title,description,location,video_link,image_link,audio_link} = req.body;
-    if(req.headers.authorization == null){
+    const { title, description, location, video_link, image_link, audio_link } = req.body;
+    if (req.headers.authorization == null) {
         const siren = await SirenAlert.create({
-            Username :"Anonymous",
-            Title : title,
-            Description : description,
-            Location : {
-                latitude : location.latitude,
-                longitude : location.longitude
+            Username: "Anonymous",
+            Title: title,
+            Description: description,
+            Location: {
+                latitude: location.latitude,
+                longitude: location.longitude
             },
-            VideoLink : video_link || 'No Video',
-            ImageLink : image_link || 'No Image',
-            AudioLink : audio_link || 'No Audio',
-            Status : 'Pending'
+            VideoLink: video_link || 'No Video',
+            ImageLink: image_link || 'No Image',
+            AudioLink: audio_link || 'No Audio',
+            Status: 'Pending'
         });
-    
+
         res.json({
-            msg : `Siren Alert sent successfully with id:${siren._id}`,
-            success : true
+            msg: `Siren Alert sent successfully with id:${siren._id}`,
+            success: true
         })
-    }else{
+    } else {
         const authorization = req.headers.authorization;
         const token = authorization.split(' ')[1];  // removing the Bearer
-        const username = jwt.verify(token,JWT_KEY);
-        const Current_user  = await current_user(username);
+        const username = jwt.verify(token, JWT_KEY);
+        const Current_user = await current_user(username);
         const siren = await SirenAlert.create({
-            Username : Current_user.Username ? Current_user.Username : "Anonymous",
-            Title : title,
-            Description : description,
-            Location : {
-                latitude : location.latitude,
-                longitude : location.longitude
+            Username: Current_user.Username ? Current_user.Username : "Anonymous",
+            Title: title,
+            Description: description,
+            Location: {
+                latitude: location.latitude,
+                longitude: location.longitude
             },
-            VideoLink : video_link || 'No Video',
-            ImageLink : image_link || 'No Image',
-            AudioLink : audio_link || 'No Audio',
-            Status : 'Pending'
+            VideoLink: video_link || 'No Video',
+            ImageLink: image_link || 'No Image',
+            AudioLink: audio_link || 'No Audio',
+            Status: 'Pending'
         });
-    
+
         res.json({
-            msg : `Siren Alert sent successfully with id:${siren._id}`,
-            success : true
+            msg: `Siren Alert sent successfully with id:${siren._id}`,
+            success: true
         })
     }
 
@@ -291,14 +290,14 @@ userRouter.put('/updateprofile', profileValidation, auth_user, async (req, res) 
         const emergencyContacts = await EmergencyContact.find({ userId: currentUser._id });
         const authoritiesDetails = await Authorities.findOne({ userId: currentUser._id });
 
-        if(authUpdated) {   
+        if (authUpdated) {
             return res.json({
                 msg: 'Profile updated successfully. Please signin again for authentication',
                 success: true,
             });
-        }else{
+        } else {
             res.json({
-                msg:'Profile updated successfully',
+                msg: 'Profile updated successfully',
                 success: true,
                 user: {
                     username: updatedUser.Username,
@@ -319,7 +318,7 @@ userRouter.put('/updateprofile', profileValidation, auth_user, async (req, res) 
             });
         }
 
-        
+
     } catch (error) {
         res.status(500).json({
             msg: 'Error updating profile',
@@ -334,6 +333,5 @@ userRouter.use((err, req, res, next) => {
     console.error('You have been caught up', err);
     res.status(500).send('Something broke!');
 });
-
 
 module.exports = userRouter;

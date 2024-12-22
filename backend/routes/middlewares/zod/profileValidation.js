@@ -10,15 +10,22 @@ const profileSchema = z.object({
     college_name: z.string().min(2).max(100).optional(),
     course: z.string().min(2).max(100).optional(),
     year: z.string().min(1).max(6).optional(),
-    blood_group: z.enum(['A+', 'A-', 'B+', 'B-', 'O+', 'O-', 'AB+', 'AB-']).optional(),
+    blood_group: z.enum([
+        'A+', 'A-', 
+        'B+', 'B-', 
+        'O+', 'O-', 
+        'AB+', 'AB-'
+    ]).optional(),
     medical_conditions: z.string().max(500).optional(),
     allergies: z.string().max(500).optional(),
     medications: z.string().max(500).optional(),
-    emergency_contacts: z.array(z.object({
-        name: z.string().min(2).max(100),
-        phone: z.string().regex(/^\d{10,12}$/),
-        relation: z.string().min(2).max(50)
-    })).optional(),
+    emergency_contacts: z.array(
+        z.object({
+            name: z.string().min(2).max(100),
+            phone: z.string().regex(/^\d{10,12}$/),
+            relation: z.string().min(2).max(50)
+        })
+    ).optional(),
     authorities_details: z.object({
         name: z.string().min(2).max(100),
         phone: z.string().regex(/^\d{10,12}$/),
@@ -31,16 +38,25 @@ const profileSchema = z.object({
 const profileValidation = (req, res, next) => {
     try {
         const validation = profileSchema.safeParse(req.body);
-        if(validation.success) {
+        
+        if (validation.success) {
             req.validatedData = validation.data;
             next();
         } else {
-            const err = validation.error.issues.map(err => err.path[0] + " " + err.message);
+            const err = validation.error.issues.map(err => 
+                err.path[0] + " " + err.message
+            );
             const sentence = err.join(", ");
-            return res.status(400).json({ msg: sentence, success: false });
+            return res.status(400).json({ 
+                msg: sentence, 
+                success: false 
+            });
         }
     } catch (error) {
-        res.status(400).json({ msg: error.toString(), success: false });
+        res.status(400).json({ 
+            msg: error.toString(), 
+            success: false 
+        });
     }
 };
 

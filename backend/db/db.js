@@ -132,18 +132,6 @@ const adminSchema = new mongoose.Schema({
     Email: {
         type: String,
         required: true
-    },
-    Phone: {
-        type: Number,
-        required: true
-    },
-    Address: {
-        type: String,
-        required: true
-    },
-    type: {
-        type: String,
-        required: true
     }
 });
 
