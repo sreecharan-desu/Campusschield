@@ -1,62 +1,276 @@
 const mongoose = require('mongoose');
 
-mongoose.connect('mongodb+srv://srecharandesu:charan%402006@cluster0.a9berin.mongodb.net/taskmaster');
-
+mongoose.connect(
+    'mongodb+srv://srecharandesu:charan%402006@cluster0.a9berin.mongodb.net/CampusSchieldAPI');
 
 const userSchema = new mongoose.Schema({
-    Username : {
-        type : String,
-        required : true
+    Username: {
+        type: String,
+        required: true
     },
-    Password : {
-        type : String,
-        required : true
+    Password: {
+        type: String,
+        required: true
+    },
+    PersonalEmail: {
+        type: String,
+        default : null
+    },
+    CollegeEmail: {
+        type: String,
+        required: true,
+        unique: true
+    },
+    Phone: {
+        type: Number,
+        default : null
+    },
+    Address: {
+        type: String,
+        default : null
+    },
+    College: {
+        type: String, 
+        default : null
+    },
+    Course: {
+        type: String, 
+        default : null
+    },
+    Year: {
+        type: String, 
+        default : null
+    },
+    BloodGroup: {
+        type: String, 
+        default : null
+    },
+    MedicalConditions: {
+        type: String, 
+        default : null
+    },
+    Allergies: {
+        type: String, 
+        default : null
+    },
+    Medications: {
+        type: String, 
+        default : null
+    },
+    EmergencyContact: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'EmergencyContact', 
+        default : null
+    },
+    createdAt: {
+        type: Date,
+        default: Date.now
+    },
+    updatedAt: {
+        type: Date,
+        default: Date.now
     }
-})
+});
+
+const emergencyContactSchema = new mongoose.Schema({
+    userId: {
+        type: mongoose.Schema.ObjectId,
+        ref: 'User',
+        required: true
+    },
+    Name: {
+        type: String,
+        required: true
+    },
+    Phone: {
+        type: Number,
+        required: true
+    },
+    Relationship: {
+        type: String,
+        required: true
+    }
+});
+
+const AuthoritiesDetails = new mongoose.Schema({    
+    Name: {
+        type: String,
+        required: true
+    },
+    Phone: {
+        type: Number,
+        required: true
+    },
+    Address: {
+        type: String,
+        required: true
+    },
+    Email : {
+        type: String,
+        required: true
+    },
+    Type: {
+        type: String,
+        required: true
+    },
+    userId: {
+        type: mongoose.Schema.ObjectId,
+        ref: 'User',
+        required: true
+    },    
+});
 
 const adminSchema = new mongoose.Schema({
+    Username: {
+        type: String,
+        required: true
+    },
+    Password: {
+        type: String,
+        required: true
+    },
+    Email: {
+        type: String,
+        required: true
+    },
+    Phone: {
+        type: Number,
+        required: true
+    },
+    Address: {
+        type: String,
+        required: true
+    },
+    type: {
+        type: String,
+        required: true
+    }
+});
+
+const reportsSchema = new mongoose.Schema({
+    userId: {
+        type: mongoose.Schema.ObjectId,
+        ref: 'User',
+        required: true
+    },
+    Title: {
+        type: String,
+        default: 'Title'
+    },
+    Description: {
+        type: String,
+        default: 'Description'
+    },
+    Status: {
+        type: String,
+        default: 'Pending'
+    },
+    Time: {
+        type: Date,
+        default: Date.now
+    },
+    createdAt: {
+        type: Date,
+        default: Date.now
+    },
+    Location: {
+        type: {
+            latitude: {
+                type: Number,
+                required: true
+            },
+            longitude: {
+                type: Number,
+                required: true
+            }
+        },
+        required: true
+    },
+    HarasserDetails: {
+        type:String,
+        default: 'Unknown'
+    },
+    VideoLink: {
+        type: String,
+        default: 'No Video'
+    },
+    ImageLink: {    
+        type: String,
+        default: 'No Image'
+    },
+    AudioLink: {
+        type: String,
+        default: 'No Audio'
+    },
+    WhomToReport: {
+        type: String,
+        default: 'Unknown'
+    }
+});
+
+const sirenAlertSchema = new mongoose.Schema({
+    userId: {
+        type: mongoose.Schema.ObjectId,
+        ref: 'User',
+    },
     Username : {
-        type : String,
-        required : true
+        type: String,
     },
-    Password : {
-        type : String,
-        required : true
-    }
-})
+    Title: {
+        type: String,
+        default: 'Title'
+    },
+    Description: {
+        type: String,
+        default: 'Description'
+    },
+    Status: {
+        type: String,
+        default: 'Pending'
+    },
+    Location: {
+        type: {
+            latitude: {
+                type: Number,
+                required: true
+            },
+            longitude: {
+                type: Number,
+                required: true
+            }
+        },
+        required: true
+    },
+    Time: {
+        type: Date,
+        default: Date.now
+    },
+    VideoLink : {
+        type: String,
+        default: 'No Video'
+    },
+    ImageLink : {
+        type: String,
+        default: 'No Image'
+    },
+    AudioLink : {
+        type: String,
+        default: 'No Audio'
+    },
+});
 
-const todosSchema = new mongoose.Schema({
-    userId : {
-        type : mongoose.Schema.ObjectId,
-        ref : 'User',
-        required : true
-    },
-    Title : {
-        type  : String,
-        default: "Title", // Automatically sets to the current date and time
-    },
-    Description : {
-        type  : String,
-        default: "Description", // Automatically sets to the current date and time
-    },
-    Completed : {
-        type  : Boolean,
-        default: false, // Automatically sets to the current date and time
-    },
-    Time : {
-        type  : Date,
-        default: Date.now, // Automatically sets to the current date and time
-    }
-})
-
-
-const User = new mongoose.model('User',userSchema);
-const Admin = new mongoose.model('Admin',adminSchema);
-const Todos = new mongoose.model('Todos',todosSchema);
+const User = mongoose.model('User', userSchema);
+const Admin = mongoose.model('Admin', adminSchema);
+const Report = mongoose.model('Report', reportsSchema);
+const EmergencyContact = mongoose.model('EmergencyContact', emergencyContactSchema);
+const SirenAlert = mongoose.model('SirenAlert', sirenAlertSchema);
+const Authorities = mongoose.model('Authorities', AuthoritiesDetails);
 
 module.exports = {
     User,
     Admin,
-    Todos
-    //exports here
-}
+    Report,
+    EmergencyContact,
+    SirenAlert,
+    Authorities
+};

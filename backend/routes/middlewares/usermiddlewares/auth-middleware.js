@@ -3,7 +3,17 @@ const {JWT_KEY} = require('./JWT/generate-auth-key');
 const { User } = require('../../../db/db');
 
 const auth_user = (req,res,next)=>{
+
+
     const authorization = req.headers.authorization;
+
+    if(!authorization){ 
+        return res.json({
+            msg : 'Auth Failed (No Token Provided)',
+            success : false
+        })
+    }
+
     const token = authorization.split(' ')[1];  // removing the Bearer
 
     try{
@@ -12,7 +22,8 @@ const auth_user = (req,res,next)=>{
     }
     catch(e){
         res.json({
-            msg : 'Auth Failed (Invalid Token)'
+            msg : 'Auth Failed (Invalid Token)',
+            success : false
         })
     }
 }
