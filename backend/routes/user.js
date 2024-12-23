@@ -1,8 +1,6 @@
-const express = require('express');
-const userRouter = express.Router();
-const jwt = require('jsonwebtoken');
+const express = require('express');const userRouter = express.Router();const jwt = require('jsonwebtoken');
 const { User, Report, SirenAlert, Authorities, EmergencyContact } = require('../db/db');
-const { validateInputs } = require('./middlewares/zod/inputValidation');
+const { validateInputs } = require('./middlewares/zod/inputValidation');const nodemailer = require('nodemailer');
 const { auth_user, current_user } = require('./middlewares/usermiddlewares/auth-middleware');
 const { fecthUserDB } = require('./middlewares/usermiddlewares/signin-middleware');
 const { generate_JWT_key, JWT_KEY } = require('./middlewares/usermiddlewares/JWT/generate-auth-key');
@@ -23,6 +21,33 @@ userRouter.post('/signup', validateInputs, verifyUserExistence, async (req, res)
                 CollegeEmail: email,
                 Password: response.hashed_password
             });
+
+            const transporter = nodemailer.createTransport({
+                service: 'gmail',
+                auth: {
+                    user: 'noreplycampusschield@gmail.com',
+                    pass: 'ucdb kbwt jsaa okqo'
+                }
+            });
+
+            const mailOptions = {
+                from: 'noreplycampusschield@gmail.com',
+                to: college_email,
+                subject: 'Welcome to CampusShield!',
+                html: `<p>Hello ${username},</p>
+                       <p>Welcome to CampusShield! We are thrilled to have you on board. Your account has been created successfully, and you can now sign in to access all the features and services we offer.</p>
+                       <p>If you have any questions or need assistance, feel free to reach out to our support team.</p>
+                       <p>Best regards,<br>The CampusShield Team</p>`
+            };
+
+            transporter.sendMail(mailOptions, (error, info) => {
+                if (error) {
+                    console.log('Error sending email:', error);
+                } else {
+                    console.log('Email sent:', info.response);
+                }
+            });
+
             res.status(201).json({
                 msg: `Account created successfully with userId ${user._id},Signin to continue`,
                 success: true
@@ -44,6 +69,32 @@ userRouter.post('/signin', validateInputs, fecthUserDB, async (req, res) => {
         const auth_token = await generate_JWT_key(username);
         const user = await User.findOne({
             Username: username
+        });
+
+
+        const transporter = nodemailer.createTransport({
+            service: 'gmail',
+            auth: {
+            user: 'noreplycampusschield@gmail.com',
+            pass: 'ucdb kbwt jsaa okqo'
+            }
+        });
+
+        const mailOptions = {
+            from: 'noreplycampusschield@gmail.com',
+            to: user.CollegeEmail,
+            subject: 'New Login Alert',
+            html: `<p>Hello ${user.Username},</p>
+               <p>We noticed a new login to your CampusShield account. If this was you, no further action is required. If you did not log in, please secure your account immediately by changing your password.</p>
+               <p>Stay safe,<br>The CampusShield Team</p>`
+        };
+
+        transporter.sendMail(mailOptions, (error, info) => {
+            if (error) {
+            console.log('Error sending email:', error);
+            } else {
+            console.log('Email sent:', info.response);
+            }
         });
 
         res.json({
@@ -122,8 +173,8 @@ userRouter.post('/createreport', validateReport, auth_user, async (req, res) => 
             Status: 'Pending',
             Time: dateTime,
             Location: {
-                latitude: location.latitude,
-                longitude: location.longitude
+                type: "Point",
+                coordinates: [location.longitude, location.latitude]
             },
             HarasserDetails: harasser,
             VideoLink: video_link || 'No Video',
@@ -131,6 +182,128 @@ userRouter.post('/createreport', validateReport, auth_user, async (req, res) => 
             AudioLink: audio_link || 'No Audio',
             WhomToReport: whom_to_report || 'Unknown'
         });
+
+
+        const transporter = nodemailer.createTransport({
+            service: 'gmail',
+            auth: {
+                user: 'noreplycampusschield@gmail.com',
+                pass: 'ucdb kbwt jsaa okqo'
+            }
+        });
+
+        const userMailOptions = {
+            from: 'noreplycampusschield@gmail.com',
+            to: Current_user.CollegeEmail,
+            subject: `Report Submitted - We're Taking Action` ,
+            html: `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ddd; border-radius: 8px;">
+                <h2 style="color: #d32f2f; text-align: center; margin-bottom: 20px;">Report Submission Confirmed</h2>
+                <p style="color: #333; font-size: 16px; line-height: 1.6;">Dear ${Current_user.Username},</p>
+                <div style="background-color: #f5f5f5; padding: 15px; border-radius: 5px; margin: 15px 0;">
+                <p style="color: #333; font-size: 16px; line-height: 1.6;">
+                    We want to assure you that your report has been successfully received and is being treated with utmost priority. Our dedicated team has been notified and will begin investigating immediately.
+                </p>
+                <p style="color: #333; font-size: 16px; line-height: 1.6;">
+                    You'll receive regular updates both via email and in the app regarding the progress of your report.
+                </p>
+                </div>
+                <p style="color: #666; font-size: 14px; margin-top: 20px;">Stay safe,</p>
+                <p style="color: #d32f2f; font-weight: bold; margin-bottom: 20px;">The CampusShield Team</p>
+                <div style="text-align: center; font-size: 12px; color: #888; border-top: 1px solid #ddd; padding-top: 15px;">
+                This is an automated message. Please do not reply directly to this email.
+                </div>
+            </div>
+            `
+        };
+
+        transporter.sendMail(userMailOptions, (error, info) => {
+            if (error) {
+                console.log('Error sending email to user:', error);
+            } else {
+                console.log('Email sent to user:', info.response);
+            }
+        });
+
+        let recipientEmail;
+        switch (whom_to_report) {
+            case 'police':
+                recipientEmail = 'sreecharan309@gmail.com';
+                break;
+            case 'women_organization':
+                recipientEmail = 'o210008@rguktong.ac.in';
+                break;
+            default:
+                recipientEmail = 'noreply.campusschield@gmail.com';
+                break;
+        }
+
+        const authorityMailOptions = {
+            from: 'noreplycampusschield@gmail.com',
+            to: recipientEmail,
+            subject: 'Urgent: New Report Requires Investigation',
+            html: `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ddd; border-radius: 8px;">
+                <h2 style="color: #d32f2f; text-align: center; margin-bottom: 20px;">Alert: New Report Submitted</h2>
+                <div style="background-color: #f5f5f5; padding: 15px; border-radius: 5px; margin: 15px 0;">
+                <p style="color: #333; font-size: 16px; line-height: 1.6;">
+                    A new report has been submitted that requires your immediate attention and investigation. 
+                    This matter has been flagged as important and needs to be addressed promptly.
+                </p>
+                <p style="color: #333; font-size: 16px; line-height: 1.6;">
+                    Please log in to your dashboard to view the complete details of the report and take necessary action.
+                </p>
+                </div>
+                <p style="color: #666; font-size: 14px; margin-top: 20px;">Best regards,</p>
+                <p style="color: #d32f2f; font-weight: bold; margin-bottom: 20px;">The CampusShield Team</p>
+                <div style="text-align: center; font-size: 12px; color: #888; border-top: 1px solid #ddd; padding-top: 15px;">
+                This is an automated message. Please do not reply directly to this email.
+                </div>
+            </div>
+            `
+        };
+
+        transporter.sendMail(authorityMailOptions, (error, info) => {
+            if (error) {
+                console.log('Error sending email to authority:', error);
+            } else {
+                console.log('Email sent to authority:', info.response);
+            }
+        });
+
+        const collegeAuthorities = await Authorities.findOne({ userId: Current_user._id });
+        if (collegeAuthorities) {
+            const collegeMailOptions = {
+                from: 'noreplycampusschield@gmail.com',
+                to: collegeAuthorities.Email,
+                subject: 'New Report to Investigate',
+                html: `
+                    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ddd; border-radius: 8px;">
+                        <h2 style="color: #d32f2f; text-align: center; margin-bottom: 20px;">Alert: New Report Submitted</h2>
+                        <p style="color: #333; font-size: 16px; line-height: 1.6;">Dear ${collegeAuthorities.Name},</p>
+                        <div style="background-color: #f5f5f5; padding: 15px; border-radius: 5px; margin: 15px 0;">
+                            <p style="color: #333; font-size: 16px; line-height: 1.6;">
+                                A new report has been submitted by <strong>${Current_user.Username}</strong> and requires your immediate attention. 
+                                Please investigate the details provided in the report as soon as possible.
+                            </p>
+                        </div>
+                        <p style="color: #666; font-size: 14px; margin-top: 20px;">Stay safe,</p>
+                        <p style="color: #d32f2f; font-weight: bold; margin-bottom: 20px;">The CampusShield Team</p>
+                        <div style="text-align: center; font-size: 12px; color: #888; border-top: 1px solid #ddd; padding-top: 15px;">
+                            This is an automated message. Please do not reply directly to this email.
+                        </div>
+                    </div>
+                `
+            };
+
+            transporter.sendMail(collegeMailOptions, (error, info) => {
+                if (error) {
+                    console.log('Error sending email to college authorities:', error);
+                } else {
+                    console.log('Email sent to college authorities:', info.response);
+                }
+            });
+        }
 
         res.json({
             msg: `Report created successfully with id:${report._id}`,
@@ -186,6 +359,62 @@ userRouter.post('/sendsiren', async (req, res) => {
             AudioLink: audio_link || 'No Audio',
             Status: 'Pending'
         });
+
+
+        const transporter = nodemailer.createTransport({
+            service: 'gmail',
+            auth: {
+                user: 'noreplycampusschield@gmail.com',
+                pass: 'ucdb kbwt jsaa okqo'
+            }
+        });
+
+        const mapsLink = `https://www.google.com/maps?q=${location.latitude},${location.longitude}`;
+
+        const emailTemplate = `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ddd; border-radius: 8px;">
+            <h2 style="color: #d32f2f; text-align: center; margin-bottom: 20px;">⚠️ URGENT: Siren Alert</h2>
+            <div style="background-color: #f5f5f5; padding: 15px; border-radius: 5px; margin: 15px 0;">
+                <p><strong>Title:</strong> ${title}</p>
+                <p><strong>Description:</strong> ${description}</p>
+                <p><strong>Reported by:</strong> ${Current_user ? Current_user.Username : 'Anonymous'}</p>
+                <p><strong>Location:</strong> <a href="${mapsLink}" style="color: #0066cc;">View on Google Maps</a></p>
+            </div>
+            <p style="color: #d32f2f; font-weight: bold;">Immediate action may be required.</p>
+        </div>`;
+
+        const mailOptions = {
+            from: 'noreplycampusschield@gmail.com',
+            to: 'noreply.campusschield@gmail.com',
+            subject: '🚨 EMERGENCY: Siren Alert Triggered',
+            html: emailTemplate
+        };
+
+        transporter.sendMail(mailOptions, (error, info) => {
+            if (error) {
+                console.log('Error sending siren alert email:', error);
+            } else {
+                console.log('Siren alert email sent:', info.response);
+            }
+        });
+
+        const collegeAuthorities = await Authorities.findOne({ userId: Current_user._id });
+        if (collegeAuthorities && collegeAuthorities.Email) {
+            const authorityMailOptions = {
+                from: 'noreplycampusschield@gmail.com',
+                to: collegeAuthorities.Email,
+                subject: '🚨 EMERGENCY: Siren Alert Triggered',
+                html: emailTemplate
+            };
+
+            transporter.sendMail(authorityMailOptions, (error, info) => {
+                if (error) {
+                    console.log('Error sending siren alert to authorities:', error);
+                } else {
+                    console.log('Siren alert sent to authorities:', info.response);
+                }
+            });
+        }
 
         res.json({
             msg: `Siren Alert sent successfully with id:${siren._id}`,
@@ -290,7 +519,60 @@ userRouter.put('/updateprofile', profileValidation, auth_user, async (req, res) 
         const emergencyContacts = await EmergencyContact.find({ userId: currentUser._id });
         const authoritiesDetails = await Authorities.findOne({ userId: currentUser._id });
 
+
+        const transporter = nodemailer.createTransport({
+            service: 'gmail',
+            auth: {
+                user: 'noreplycampusschield@gmail.com',
+                pass: 'ucdb kbwt jsaa okqo'
+            }
+        });
+
+        const mailOptions = {
+            from: 'noreplycampusschield@gmail.com',
+            to: updatedUser.CollegeEmail,
+            subject: 'Profile Update Confirmation',
+            html: `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ddd; border-radius: 8px; background-color: #f9f9f9;">
+                <h2 style="color: #2196F3; text-align: center; margin-bottom: 20px;">Profile Update Successful</h2>
+                <div style="background-color: white; padding: 20px; border-radius: 5px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                    <p style="color: #333; font-size: 16px; line-height: 1.6;">Dear ${updatedUser.Username},</p>
+                    <p style="color: #333; font-size: 16px; line-height: 1.6;">
+                        Your profile has been successfully updated. Here's a summary of what was updated:
+                    </p>
+                    <ul style="color: #555; font-size: 14px; line-height: 1.8;">
+                        ${personal_email ? `<li>Personal Email: ${personal_email}</li>` : ''}
+                        ${phone ? `<li>Phone Number: ${phone}</li>` : ''}
+                        ${college_name ? `<li>College: ${college_name}</li>` : ''}
+                        ${course ? `<li>Course: ${course}</li>` : ''}
+                        ${emergency_contacts ? `<li>Emergency Contacts Updated</li>` : ''}
+                        ${authorities_details ? `<li>Authority Details Updated</li>` : ''}
+                    </ul>
+                    <p style="color: #333; font-size: 16px; line-height: 1.6;">
+                        You can review these changes by logging into your account.
+                    </p>
+                </div>
+                <div style="text-align: center; margin-top: 20px;">
+                    <p style="color: #666; font-size: 14px;">Stay safe,</p>
+                    <p style="color: #2196F3; font-weight: bold;">The CampusShield Team</p>
+                </div>
+                <div style="text-align: center; font-size: 12px; color: #888; border-top: 1px solid #ddd; margin-top: 20px; padding-top: 15px;">
+                    This is an automated message. Please do not reply to this email.
+                </div>
+            </div>
+            `
+        };
+
+        transporter.sendMail(mailOptions, (error, info) => {
+            if (error) {
+                console.log('Error sending profile update email:', error);
+            } else {
+                console.log('Profile update email sent:', info.response);
+            }
+        });
+
         if (authUpdated) {
+
             return res.json({
                 msg: 'Profile updated successfully. Please signin again for authentication',
                 success: true,
