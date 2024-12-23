@@ -1,9 +1,16 @@
 import { useNavigate } from 'react-router-dom';
+
 export default function BottomNavbar(){
     const navigate = useNavigate();
 
     const handleNavigation = (path) => {
         navigate(path);
+    };
+
+    // Check if user is authenticated
+    const isAuthenticated = () => {
+        const token = localStorage.getItem('token');
+        return token && token !== '' && token !== 'undefined' && token !== null;
     };
 
     return (
@@ -19,15 +26,18 @@ export default function BottomNavbar(){
                     <span className="text-xs mt-1">Home</span>
                 </button>
                
-                <button 
-                    onClick={() => handleNavigation('/create-report')}
-                    className="flex flex-col items-center justify-center w-1/4"
-                >
-                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    <span className="text-xs mt-1">Create Report</span>
-                </button>
+                {isAuthenticated() && (
+                    <button 
+                        onClick={() => handleNavigation('/create-report')}
+                        className="flex flex-col items-center justify-center w-1/4"
+                    >
+                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <span className="text-xs mt-1">Create Report</span>
+                    </button>
+                )}
+
                 <button 
                     onClick={() => handleNavigation('/support')}
                     className="flex flex-col items-center justify-center w-1/4"
@@ -49,4 +59,4 @@ export default function BottomNavbar(){
             </div>
         </div>
     );
-};
+}

@@ -93,11 +93,11 @@ const Report = () => {
                                     name="location"
                                     value={formData.location}
                                     onChange={handleInputChange}
-                                    className="flex-1 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-transparent"
+                                    className="flex-1 mb-3 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-transparent"
                                     placeholder="Enter location or use auto-detect"
                                     required
                                 />
-                                
+                                <br />
                                 <button
                                     type="button"
                                     onClick={() => {

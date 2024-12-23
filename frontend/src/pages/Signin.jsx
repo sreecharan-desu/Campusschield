@@ -18,7 +18,7 @@ const Signin = () => {
     const signInSchema = z.object({
         username: z.string().min(3, 'Username must be at least 3 characters'),
         password: z.string().min(6, 'Password must be at least 6 characters'),
-        college_email: z.string().email('Invalid email format').endsWith('.edu', 'Must be a valid college email')
+        college_email: z.string().email('Invalid email format').includes('rgukt', 'Must be a valid college email')
     });
 
     const handleChange = (e) => {
@@ -46,10 +46,18 @@ const Signin = () => {
             const validatedData = signInSchema.parse(formData);
 
             // Make API call
-            const response = await axios.post('/api/signin', validatedData);
+            const response = await axios.post('https://campus-schield-backend-api.vercel.app/api/v1/user/signin', validatedData);
             
-            // Handle successful signin
-            navigate('/dashboard');
+            if (response.data.success) {
+                // Store token in localStorage
+                localStorage.setItem('token', response.data.token);
+                // Store user data in localStorage
+                localStorage.setItem('user', JSON.stringify(response.data.user));
+                // Handle successful signin
+                navigate('/dashboard');
+            } else {
+                setApiError(response.data.msg || 'Sign in failed. Please try again.');
+            }
         } catch (error) {
             if (error instanceof z.ZodError) {
                 // Handle validation errors
@@ -60,7 +68,7 @@ const Signin = () => {
                 setErrors(fieldErrors);
             } else {
                 // Handle API errors
-                setApiError(error.response?.data?.message || 'Sign in failed. Please try again.');
+                setApiError(error.response?.data?.msg || 'Sign in failed. Please try again.');
             }
         } finally {
             setIsLoading(false);
@@ -169,6 +177,18 @@ const Signin = () => {
                         <a href="#" className="font-medium text-indigo-600 hover:text-indigo-500 transition-colors duration-200">
                             Forgot your password?
                         </a>
+                    </div>
+
+                    <div className="text-center text-sm">
+                        <p className="text-gray-600">
+                            Don't have an account?{' '}
+                            <button 
+                                onClick={() => navigate('/signup')} 
+                                className="font-medium text-indigo-600 hover:text-indigo-500 transition-colors duration-200"
+                            >
+                                Sign up now
+                            </button>
+                        </p>
                     </div>
                 </form>
             </div>

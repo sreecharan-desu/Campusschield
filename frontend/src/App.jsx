@@ -1,23 +1,93 @@
-import { Routes, Route, BrowserRouter } from 'react-router-dom';
-import HomePage from './pages/Homepage';
-import Support from './pages/Support';
-import Report from './pages/Report';
-import Profile from './pages/Profile';
+import { AnimatePresence,motion } from 'framer-motion';
 import Signin from './pages/Signin';
+import Signup from './pages/Signup';
+import HomePage from './pages/Homepage';
+import Profile from './pages/Profile';
+import Report from './pages/Report';
+import Support from './pages/Support';
+import { BrowserRouter, Route, Routes } from 'react-router-dom';
 
 function App() {
     return (
         <BrowserRouter>
-            <Routes>
-                    <Route path="/" element={<HomePage />} />
-                    <Route path="/support" element={<Support />} />
-                    <Route path="/create-report" element={<Report/>} />
-                    <Route path="/profile" element={<Profile/>} />
-                    <Route path="/signin" element={<Signin/>} />
-                    <Route path="/signup" element={<Profile/>} />
-            </Routes>
+            <AnimatePresence mode="wait">
+                <Routes>
+                    <Route path="/" element={
+                        <motion.div
+                            initial={{ opacity: 0, x: 20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            exit={{ opacity: 0, x: -20 }}
+                            transition={{ duration: 0.5 }}
+                        >
+                            <HomePage />
+                        </motion.div>
+                    } />
+                    <Route path="/signin" element={
+                        <motion.div
+                            initial={{ opacity: 0, x: 20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            exit={{ opacity: 0, x: -20 }}
+                            transition={{ duration: 0.5 }}
+                        >
+                            <Signin />
+                        </motion.div>
+                    } />
+                                        <Route path="/signup" element={
+                        <motion.div
+                            initial={{ opacity: 0, x: 20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            exit={{ opacity: 0, x: -20 }}
+                            transition={{ duration: 0.5 }}
+                        >
+                            <Signup />
+                        </motion.div>
+                    } />
+                                        <Route path="/create-report" element={
+                        <motion.div
+                            initial={{ opacity: 0, x: 20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            exit={{ opacity: 0, x: -20 }}
+                            transition={{ duration: 0.5 }}
+                        >
+                            <Report />
+                        </motion.div>
+                    } />
+                                                            <Route path="/profile" element={
+                        <motion.div
+                            initial={{ opacity: 0, x: 20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            exit={{ opacity: 0, x: -20 }}
+                            transition={{ duration: 0.5 }}
+                        >
+                            <Profile />
+                        </motion.div>
+                    } />
+                                                            <Route path="/support" element={
+                        <motion.div
+                            initial={{ opacity: 0, x: 20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            exit={{ opacity: 0, x: -20 }}
+                            transition={{ duration: 0.5 }}
+                        >
+                            <Support />
+                        </motion.div>
+                    } />
+                </Routes>
+            </AnimatePresence>
         </BrowserRouter>
     );
 }
+
+// Create a PageWrapper component for reuse
+const PageWrapper = ({ children }) => (
+    <motion.div
+        initial={{ opacity: 0, x: 20 }}
+        animate={{ opacity: 1, x: 0 }}
+        exit={{ opacity: 0, x: -20 }}
+        transition={{ duration: 0.5 }}
+    >
+        {children}
+    </motion.div>
+);
 
 export default App;
