@@ -129,6 +129,53 @@ userRouter.post('/signin', validateInputs, fecthUserDB, async (req, res) => {
     }
 });
 
+userRouter.get('/details', auth_user, async (req, res) => {
+    try {
+        const authorization = req.headers.authorization;
+        const token = authorization.split(' ')[1];  // removing the Bearer
+        const username = jwt.verify(token, JWT_KEY);
+        const Current_user = await current_user(username);
+        if (Current_user == null) {
+            return res.json({
+                msg: 'FATAL : User not found',
+                success: false
+            })
+        } else {
+            const emergencyContacts = await EmergencyContact.find({ userId: Current_user._id });
+            const authoritiesDetails = await Authorities.findOne({ userId: Current_user._id });
+
+            res.json({
+                user: {
+                    id: Current_user._id,
+                    username: Current_user.Username,
+                    college_email: Current_user.CollegeEmail,
+                    personal_email: Current_user.PersonalEmail || null,
+                    phone: Current_user.Phone || null,
+                    address: Current_user.Address || null,
+                    college: Current_user.College || null,
+                    course: Current_user.Course || null,
+                    year: Current_user.Year || null,
+                    blood_group: Current_user.BloodGroup || null,
+                    medical_conditions: Current_user.MedicalConditions || null,
+                    allergies: Current_user.Allergies || null,
+                    medications: Current_user.Medications || null,
+                    emergency_contacts: emergencyContacts || null,
+                    authorities_details: authoritiesDetails || null,
+                    created_at: Current_user.createdAt
+                },
+                success: true
+            })
+        }
+    } catch (e) {
+        res.json({
+            msg: 'An error occurred while fetching the user details',
+            success: false
+        })
+    }
+}
+);
+    
+
 //(get) -end points
 userRouter.get('/getreports', auth_user, async (req, res) => {
     //returns all the reports of the user
@@ -163,8 +210,20 @@ userRouter.post('/createreport', validateReport, auth_user, async (req, res) => 
 
     try {
         const authorization = req.headers.authorization;
+        if (!authorization) {
+            return res.status(401).json({
+                msg: 'Authorization header missing',
+                success: false
+            });
+        }
         const token = authorization.split(' ')[1];  // removing the Bearer
-        const username = await jwt.verify(token, JWT_KEY);
+        if (!token) {
+            return res.status(401).json({
+                msg: 'Token missing',
+                success: false
+            });
+        }
+        const username = jwt.verify(token, JWT_KEY);
         const Current_user = await current_user(username);
 
         const report = await Report.create({
@@ -320,7 +379,8 @@ userRouter.post('/createreport', validateReport, auth_user, async (req, res) => 
 userRouter.post('/sendsiren', async (req, res) => {
     //sends siren alert to the user
     const { title, description, location, video_link, image_link, audio_link } = req.body;
-    if (req.headers.authorization == null) {
+    if (!req.headers.authorization.includes("Bearer")) {
+        console.log("Sending an anonymus siren")
         const siren = await SirenAlert.create({
             Username: "Anonymous",
             Title: title,
@@ -335,7 +395,7 @@ userRouter.post('/sendsiren', async (req, res) => {
             Status: 'Pending'
         });
 
-        res.json({
+        return res.json({
             msg: `Siren Alert sent successfully with id:${siren._id}`,
             success: true
         })
