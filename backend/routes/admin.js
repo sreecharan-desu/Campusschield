@@ -1,5 +1,5 @@
 const bcrypt = require('bcrypt');const express = require('express');const jwt = require('jsonwebtoken');
-const adminRouter = express.Router();const { Admin, User } = require('../db/db');const nodemailer = require('nodemailer');
+const adminRouter = express.Router();const { Admin, User,Report } = require('../db/db');const nodemailer = require('nodemailer');
 const { validateInputs } = require('./middlewares/zod/inputValidation');const { fetchDB } = require('./middlewares/adminmiddlewares/signin-middleware');
 const { auth_admin } = require('./middlewares/adminmiddlewares/auth-middleware');
 const { AdminPrescence } = require('./middlewares/adminmiddlewares/signup-middleware');
@@ -13,7 +13,7 @@ adminRouter.post('/signup', validateInputs, AdminPrescence, async (req, res) => 
     const admin = await Admin.create({
         Username: username,
         Password: hashed_password,
-        Email: '',
+        Email: 'noreply.campusschield@gmail.com',
     });
 
     res.json({
@@ -22,23 +22,16 @@ adminRouter.post('/signup', validateInputs, AdminPrescence, async (req, res) => 
     });
 });
 
-adminRouter.post('/signin', validateInputs, fetchDB, (req, res) => {
+adminRouter.post('/signin', validateInputs, fetchDB, async(req, res) => {
     const { username } = req.body;
     const token = generate_JWT_key(username);
-
+    const admin = await Admin.findOne({ Username: username });
     res.json({
-        token
-    });
-});
-
-adminRouter.get('/details', auth_admin, async (req, res) => {
-    // gets the admin details
-    const authorization = req.headers.authorization;
-    const token = authorization.split(' ')[1];
-    const username = jwt.verify(token, JWT_KEY);
-
-    res.json({
-        username
+        admin : {
+            id : admin._id,
+            username : admin.Username,
+            email : admin.Email
+        },token,success: true
     });
 });
 
@@ -47,7 +40,7 @@ adminRouter.get('/getusers', auth_admin, async (req, res) => {
     const users = await User.find();
 
     res.json({
-        users
+        users,success : true,usercount : users.length
     });
 });
 
@@ -107,23 +100,26 @@ adminRouter.get('/reports', auth_admin, async (req, res) => {
 adminRouter.put('/changestatus', auth_admin, async (req, res) => {
     try {
         const {id,status} = req.body;
-        const report = await Report.updateOne({
+        const report = await Report.findByIdAndUpdate({
             _id: id
         }, {
             status
         });
 
+        console.log(report);
+
         const user = await User.findOne({ _id : report.userId });
 
         const emailContent = `
-            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-                <h2 style="color: #444;">Campus Shield Report Update</h2>
-                <p>Dear User,</p>
-                <p>Your report status has been updated to: <strong>${status}</strong></p>
-                <p>Report ID: ${id}</p>
-                <p>If you have any questions, please don't hesitate to contact us.</p>
-                <hr style="border: 1px solid #eee;">
-                <p style="color: #666; font-size: 12px;">This is an automated message from Campus Shield.</p>
+            <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9f9f9; border-radius: 10px;">
+            <h2 style="color: #2c3e50; text-align: center;">Campus Shield Report Update</h2>
+            <p style="color: #34495e; font-size: 16px;">Hello ${user.Username},</p>
+            <p style="color: #34495e; font-size: 16px;">We wanted to let you know that the status of your report has been updated to: <strong style="color: #e74c3c;">${status}</strong></p>
+            <p style="color: #34495e; font-size: 16px;">Report ID: <strong>${id}</strong></p>
+            <p style="color: #34495e; font-size: 16px;">If you have any questions or need further assistance, please feel free to reach out to our support team.</p>
+            <p style="color: #34495e; font-size: 16px;">Thank you for using Campus Shield!</p>
+            <hr style="border: 1px solid #ecf0f1;">
+            <p style="color: #95a5a6; font-size: 12px; text-align: center;">This is an automated message from Campus Shield. Please do not reply to this email.</p>
             </div>
         `;
 
@@ -172,19 +168,21 @@ adminRouter.put('/changestatus', auth_admin, async (req, res) => {
 adminRouter.delete('/deletereport', auth_admin, async (req, res) => {
     try {
         const {id} = req.body;
-        const report = await Report.deleteOne({
+        const report = await Report.findByIdAndDelete({
             _id: id
         });
 
+        console.log(report);
+
         const user = await User.findOne({ _id : report.userId });
         const emailContent = `
-            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-            <h2 style="color: #444;">Campus Shield Report Deletion Notice</h2>
-            <p>Dear User,</p>
-            <p>We regret to inform you that your report with ID: <strong>${id}</strong> has been deleted from our system.</p>
-            <p>If you have any questions or believe this was a mistake, please contact our support team immediately.</p>
-            <hr style="border: 1px solid #eee;">
-            <p style="color: #666; font-size: 12px;">This is an automated message from Campus Shield.</p>
+            <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9f9f9; border-radius: 10px;">
+            <h2 style="color: #2c3e50; text-align: center;">Campus Shield Report Deletion Notice</h2>
+            <p style="color: #34495e; font-size: 16px;">Hello ${user.Username},</p>
+            <p style="color: #34495e; font-size: 16px;">We regret to inform you that your report with ID: <strong style="color: #e74c3c;">${id}</strong> has been deleted from our system.</p>
+            <p style="color: #34495e; font-size: 16px;">If you have any questions or believe this was a mistake, please contact our support team immediately.</p>
+            <hr style="border: 1px solid #ecf0f1;">
+            <p style="color: #95a5a6; font-size: 12px; text-align: center;">This is an automated message from Campus Shield. Please do not reply to this email.</p>
             </div>
         `;
 
@@ -222,4 +220,5 @@ adminRouter.delete('/deletereport', auth_admin, async (req, res) => {
         });
     }
 });
+
 module.exports = adminRouter;

@@ -2,10 +2,12 @@ const jwt  = require('jsonwebtoken');
 const {JWT_KEY} = require('./JWT/generate-auth-key');
 const { User } = require('../../../db/db');
 
-const auth_user = (req,res,next)=>{
+const auth_user = async(req,res,next)=>{
 
 
     const authorization = req.headers.authorization;
+    const username = req.body.username;
+
 
     if(!authorization){ 
         return res.json({
@@ -14,11 +16,20 @@ const auth_user = (req,res,next)=>{
         })
     }
 
-    const token = authorization.split(' ')[1];  // removing the Bearer
-
     try{
-        jwt.verify(token,JWT_KEY);
-        next();
+        const authorization = req.headers.authorization;
+        const token = authorization.split(' ')[1];  // removing the Bearer
+        const Username = jwt.verify(token, JWT_KEY);
+        const Current_user = await current_user(Username)
+
+        if(Current_user.Username !== username){
+            res.json({
+                msg : 'Auth Failed (Invalid Token)',
+                success : false
+            })
+        }else{
+            next();
+        }
     }
     catch(e){
         res.json({

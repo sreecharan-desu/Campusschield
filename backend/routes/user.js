@@ -9,6 +9,7 @@ const { generate_hashed_password } = require('./middlewares/usermiddlewares/hash
 const { getReports } = require('./middlewares/usermiddlewares/helperFNs/getReports');
 const validateReport = require('./middlewares/zod/reportValidation');
 const profileValidation = require('./middlewares/zod/profileValidation');
+const zod = require('zod');
 
 //routes
 userRouter.post('/signup', validateInputs, verifyUserExistence, async (req, res) => {
@@ -172,10 +173,7 @@ userRouter.post('/createreport', validateReport, auth_user, async (req, res) => 
             Description: description,
             Status: 'Pending',
             Time: dateTime,
-            Location: {
-                type: "Point",
-                coordinates: [location.longitude, location.latitude]
-            },
+            Location: location,
             HarasserDetails: harasser,
             VideoLink: video_link || 'No Video',
             ImageLink: image_link || 'No Image',
@@ -311,7 +309,7 @@ userRouter.post('/createreport', validateReport, auth_user, async (req, res) => 
         })
     } catch (e) {
         res.json({
-            msg: 'An error occurred while creating the report',
+            msg: `An error occurred while creating the report  ${e}`,
             success: false
         })
     }
@@ -438,26 +436,63 @@ userRouter.put('/updateprofile', profileValidation, auth_user, async (req, res) 
         const token = authorization.split(' ')[1];
         const old_username = jwt.verify(token, JWT_KEY);
 
-        // Basic user fields update
-        let updateFields = {
-            Username: username,
-            PersonalEmail: personal_email,
-            CollegeEmail: college_email,
-            Phone: phone,
-            Address: address,
-            College: college_name,
-            Course: course,
-            Year: year,
-            BloodGroup: blood_group,
-            MedicalConditions: medical_conditions,
-            Allergies: allergies,
-            Medications: medications
-        };
-
         // Get current user once
         const currentUser = await User.findOne({ Username: old_username });
         if (!currentUser) {
             throw new Error('User not found');
+        }
+
+        // Basic user fields update
+        let updateFields = {};
+        let updatedFields = [];
+
+        if (username && username !== currentUser.Username) {
+            updateFields.Username = username;
+            updatedFields.push(`Username: ${username}`);
+        }
+        if (personal_email && personal_email !== currentUser.PersonalEmail) {
+            updateFields.PersonalEmail = personal_email;
+            updatedFields.push(`Personal Email: ${personal_email}`);
+        }
+        if (college_email && college_email !== currentUser.CollegeEmail) {
+            updateFields.CollegeEmail = college_email;
+            updatedFields.push(`College Email: ${college_email}`);
+        }
+        if (phone && phone !== currentUser.Phone) {
+            updateFields.Phone = phone;
+            updatedFields.push(`Phone: ${phone}`);
+        }
+        if (address && address !== currentUser.Address) {
+            updateFields.Address = address;
+            updatedFields.push(`Address: ${address}`);
+        }
+        if (college_name && college_name !== currentUser.College) {
+            updateFields.College = college_name;
+            updatedFields.push(`College: ${college_name}`);
+        }
+        if (course && course !== currentUser.Course) {
+            updateFields.Course = course;
+            updatedFields.push(`Course: ${course}`);
+        }
+        if (year && year !== currentUser.Year) {
+            updateFields.Year = year;
+            updatedFields.push(`Year: ${year}`);
+        }
+        if (blood_group && blood_group !== currentUser.BloodGroup) {
+            updateFields.BloodGroup = blood_group;
+            updatedFields.push(`Blood Group: ${blood_group}`);
+        }
+        if (medical_conditions && medical_conditions !== currentUser.MedicalConditions) {
+            updateFields.MedicalConditions = medical_conditions;
+            updatedFields.push(`Medical Conditions: ${medical_conditions}`);
+        }
+        if (allergies && allergies !== currentUser.Allergies) {
+            updateFields.Allergies = allergies;
+            updatedFields.push(`Allergies: ${allergies}`);
+        }
+        if (medications && medications !== currentUser.Medications) {
+            updateFields.Medications = medications;
+            updatedFields.push(`Medications: ${medications}`);
         }
 
         // Update emergency contacts if provided
@@ -471,6 +506,7 @@ userRouter.put('/updateprofile', profileValidation, auth_user, async (req, res) 
                     Relationship: contact.relation
                 }))
             );
+            updatedFields.push('Emergency Contacts Updated');
         }
 
         // Update authorities if provided
@@ -487,6 +523,7 @@ userRouter.put('/updateprofile', profileValidation, auth_user, async (req, res) 
                 },
                 { upsert: true, new: true }
             );
+            updatedFields.push('Authority Details Updated');
         }
 
         // Only hash and update password if it's provided
@@ -495,6 +532,7 @@ userRouter.put('/updateprofile', profileValidation, auth_user, async (req, res) 
             if (hashResult.success) {
                 updateFields.Password = hashResult.hashed_password;
                 authUpdated = true;
+                updatedFields.push('Password Updated');
             } else {
                 return res.status(400).json({
                     msg: 'Error while hashing password',
@@ -519,60 +557,55 @@ userRouter.put('/updateprofile', profileValidation, auth_user, async (req, res) 
         const emergencyContacts = await EmergencyContact.find({ userId: currentUser._id });
         const authoritiesDetails = await Authorities.findOne({ userId: currentUser._id });
 
+        if (updatedFields.length > 0) {
+            const transporter = nodemailer.createTransport({
+                service: 'gmail',
+                auth: {
+                    user: 'noreplycampusschield@gmail.com',
+                    pass: 'ucdb kbwt jsaa okqo'
+                }
+            });
 
-        const transporter = nodemailer.createTransport({
-            service: 'gmail',
-            auth: {
-                user: 'noreplycampusschield@gmail.com',
-                pass: 'ucdb kbwt jsaa okqo'
-            }
-        });
+            const mailOptions = {
+                from: 'noreplycampusschield@gmail.com',
+                to: updatedUser.CollegeEmail,
+                subject: 'Profile Update Confirmation',
+                html: `
+                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ddd; border-radius: 8px; background-color: #f9f9f9;">
+                    <h2 style="color: #2196F3; text-align: center; margin-bottom: 20px;">Profile Update Successful</h2>
+                    <div style="background-color: white; padding: 20px; border-radius: 5px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                        <p style="color: #333; font-size: 16px; line-height: 1.6;">Dear ${updatedUser.Username},</p>
+                        <p style="color: #333; font-size: 16px; line-height: 1.6;">
+                            Your profile has been successfully updated. Here's a summary of what was updated:
+                        </p>
+                        <ul style="color: #555; font-size: 14px; line-height: 1.8;">
+                            ${updatedFields.map(field => `<li>${field}</li>`).join('')}
+                        </ul>
+                        <p style="color: #333; font-size: 16px; line-height: 1.6;">
+                            You can review these changes by logging into your account.
+                        </p>
+                    </div>
+                    <div style="text-align: center; margin-top: 20px;">
+                        <p style="color: #666; font-size: 14px;">Stay safe,</p>
+                        <p style="color: #2196F3; font-weight: bold;">The CampusShield Team</p>
+                    </div>
+                    <div style="text-align: center; font-size: 12px; color: #888; border-top: 1px solid #ddd; margin-top: 20px; padding-top: 15px;">
+                        This is an automated message. Please do not reply to this email.
+                    </div>
+                </div>
+                `
+            };
 
-        const mailOptions = {
-            from: 'noreplycampusschield@gmail.com',
-            to: updatedUser.CollegeEmail,
-            subject: 'Profile Update Confirmation',
-            html: `
-            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ddd; border-radius: 8px; background-color: #f9f9f9;">
-                <h2 style="color: #2196F3; text-align: center; margin-bottom: 20px;">Profile Update Successful</h2>
-                <div style="background-color: white; padding: 20px; border-radius: 5px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-                    <p style="color: #333; font-size: 16px; line-height: 1.6;">Dear ${updatedUser.Username},</p>
-                    <p style="color: #333; font-size: 16px; line-height: 1.6;">
-                        Your profile has been successfully updated. Here's a summary of what was updated:
-                    </p>
-                    <ul style="color: #555; font-size: 14px; line-height: 1.8;">
-                        ${personal_email ? `<li>Personal Email: ${personal_email}</li>` : ''}
-                        ${phone ? `<li>Phone Number: ${phone}</li>` : ''}
-                        ${college_name ? `<li>College: ${college_name}</li>` : ''}
-                        ${course ? `<li>Course: ${course}</li>` : ''}
-                        ${emergency_contacts ? `<li>Emergency Contacts Updated</li>` : ''}
-                        ${authorities_details ? `<li>Authority Details Updated</li>` : ''}
-                    </ul>
-                    <p style="color: #333; font-size: 16px; line-height: 1.6;">
-                        You can review these changes by logging into your account.
-                    </p>
-                </div>
-                <div style="text-align: center; margin-top: 20px;">
-                    <p style="color: #666; font-size: 14px;">Stay safe,</p>
-                    <p style="color: #2196F3; font-weight: bold;">The CampusShield Team</p>
-                </div>
-                <div style="text-align: center; font-size: 12px; color: #888; border-top: 1px solid #ddd; margin-top: 20px; padding-top: 15px;">
-                    This is an automated message. Please do not reply to this email.
-                </div>
-            </div>
-            `
-        };
-
-        transporter.sendMail(mailOptions, (error, info) => {
-            if (error) {
-                console.log('Error sending profile update email:', error);
-            } else {
-                console.log('Profile update email sent:', info.response);
-            }
-        });
+            transporter.sendMail(mailOptions, (error, info) => {
+                if (error) {
+                    console.log('Error sending profile update email:', error);
+                } else {
+                    console.log('Profile update email sent:', info.response);
+                }
+            });
+        }
 
         if (authUpdated) {
-
             return res.json({
                 msg: 'Profile updated successfully. Please signin again for authentication',
                 success: true,
@@ -600,10 +633,147 @@ userRouter.put('/updateprofile', profileValidation, auth_user, async (req, res) 
             });
         }
 
-
     } catch (error) {
         res.status(500).json({
             msg: 'Error updating profile',
+            error: error.message,
+            success: false
+        });
+    }
+});
+
+//(put) -end points
+userRouter.post('/forgotpassword',async (req, res) => {
+    try {
+        const { college_email } = req.body;
+
+        const emailSchema = zod.object({
+            college_email: zod.string().email('Invalid email address')
+        });
+
+        const validation = emailSchema.safeParse(req.body);
+        if (!validation.success) {
+            return res.status(400).json({
+                msg: 'Validation error',
+                errors: validation.error.errors,
+                success: false
+            });
+        }
+
+        const user = await User.findOne({ CollegeEmail: college_email });
+        if (!user) {
+            return res.status(404).json({
+                msg: 'User not found',
+                success: false
+            });
+        }
+
+        const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
+        await User.updateOne(   
+            { CollegeEmail: college_email },
+            {
+                OTP: otp,
+            }
+        );
+
+        const transporter = nodemailer.createTransport({
+            service: 'gmail',
+            auth: {
+                user: 'noreplycampusschield@gmail.com',
+                pass: 'ucdb kbwt jsaa okqo'
+            }
+        });
+
+        const mailOptions = {
+            from: 'noreplycampusschield@gmail.com',
+            to: college_email,
+            subject: 'Password Reset OTP',
+            html: `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ddd; border-radius: 8px; background-color: #f9f9f9;">
+                <h2 style="color: #2196F3; text-align: center; margin-bottom: 20px;">Password Reset Request</h2>
+                <div style="background-color: white; padding: 20px; border-radius: 5px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                    <p style="color: #333; font-size: 16px; line-height: 1.6;">Dear ${user.Username},</p>
+                    <p style="color: #333; font-size: 16px; line-height: 1.6;">
+                        We received a request to reset your password. Use the following OTP to reset your password. This OTP is valid for 1 hour.
+                    </p>
+                    <p style="color: #333; font-size: 24px; text-align: center; margin: 20px 0;">${otp}</p>
+                </div>
+                <div style="text-align: center; margin-top: 20px;">
+                    <p style="color: #666; font-size: 14px;">Stay safe,</p>
+                    <p style="color: #2196F3; font-weight: bold;">The CampusShield Team</p>
+                </div>
+                <div style="text-align: center; font-size: 12px; color: #888; border-top: 1px solid #ddd; margin-top: 20px; padding-top: 15px;">
+                    This is an automated message. Please do not reply to this email.
+                </div>
+            </div>
+            `
+        };
+
+        transporter.sendMail(mailOptions, (error, info) => {
+            if (error) {
+                console.log('Error sending OTP email:', error);
+            } else {
+                console.log('OTP email sent:', info.response);
+            }
+        });
+
+        res.json({
+            msg: 'OTP sent to email successfully',
+            success: true
+        });
+    } catch (error) {
+        res.status(500).json({
+            msg: 'Error sending OTP',
+            error: error.message,
+            success: false
+        });
+    }
+});
+
+userRouter.post('/verifyotp', async (req, res) => {
+    try {
+        const { college_email, otp } = req.body;
+
+        const otpSchema = zod.object({
+            college_email: zod.string().email('Invalid email address'),
+            otp: zod.string().length(6, 'OTP must be 6 digits')
+        });
+
+        const validation = otpSchema.safeParse(req.body);
+        if (!validation.success) {
+            return res.status(400).json({
+                msg: 'Validation error',
+                errors: validation.error.errors,
+                success: false
+            });
+        }
+
+        const user = await User.findOne({ CollegeEmail: college_email, OTP: otp });
+        if (!user) {
+            return res.status(400).json({
+                msg: 'Invalid OTP or email',
+                success: false
+            });
+        }
+
+        console.log('User found:', user);
+
+        const auth_token = await generate_JWT_key(user.Username);
+
+        await User.updateOne(
+            { CollegeEmail: college_email },
+            { OTP: null }
+        );
+
+        res.json({
+            msg: 'OTP verified successfully',
+            token: auth_token,
+            success: true
+        });
+    } catch (error) {
+        res.status(500).json({
+            msg: 'Error verifying OTP',
             error: error.message,
             success: false
         });
