@@ -18,7 +18,7 @@ userRouter.post('/signup', validateInputs, verifyUserExistence, async (req, res)
         if (response.success) {
             const user = await User.create({
                 Username: username,
-                CollegeEmail: email,
+                CollegeEmail: college_email,
                 Password: response.hashed_password
             });
 
