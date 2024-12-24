@@ -1,5 +1,5 @@
 const bcrypt = require('bcrypt');const express = require('express');const jwt = require('jsonwebtoken');
-const adminRouter = express.Router();const { Admin, User,Report } = require('../db/db');const nodemailer = require('nodemailer');
+const adminRouter = express.Router();const { Admin, User,Report, SirenAlert } = require('../db/db');const nodemailer = require('nodemailer');
 const { validateInputs } = require('./middlewares/zod/inputValidation');const { fetchDB } = require('./middlewares/adminmiddlewares/signin-middleware');
 const { auth_admin } = require('./middlewares/adminmiddlewares/auth-middleware');
 const { AdminPrescence } = require('./middlewares/adminmiddlewares/signup-middleware');
@@ -20,6 +20,23 @@ adminRouter.post('/signup', validateInputs, AdminPrescence, async (req, res) => 
         msg: `Admin account with id : ${admin._id} created succesfully..`,
         success: true
     });
+});
+
+adminRouter.get('/getsirens', auth_admin, async (req, res) => {
+    // gets all the sirens
+    try {
+        const sirens = await Siren.find();
+        res.json({
+            sirens,
+            success: true
+        });
+    }
+    catch (err) {
+        res.json({
+            msg: err.toString(),
+            success: false
+        });
+    }
 });
 
 adminRouter.post('/signin', validateInputs, fetchDB, async(req, res) => {
@@ -47,6 +64,14 @@ adminRouter.get('/getusers', auth_admin, async (req, res) => {
 adminRouter.delete('/deleteuser', auth_admin, async (req, res) => {
     // deletes particular user
     const userId = req.query.userId;
+
+    await Report.deleteMany({
+        userId : userId
+    })
+
+    await SirenAlert.deleteMany({
+        userId : userId
+    })
 
     await User.deleteOne({
         _id: userId

@@ -6,6 +6,8 @@ import Profile from './pages/Profile';
 import Report from './pages/Report';
 import Support from './pages/Support';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import AdminDashboard from './pages/Admin';
+import AdminSignIn from './pages/AdminSIgnin';
 
 function App() {
     return (
@@ -70,6 +72,26 @@ function App() {
                             transition={{ duration: 0.5 }}
                         >
                             <Support />
+                        </motion.div>
+                    } />
+                     <Route path="/admin/signin" element={
+                        <motion.div
+                            initial={{ opacity: 0, x: 20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            exit={{ opacity: 0, x: -20 }}
+                            transition={{ duration: 0.5 }}
+                        >
+                            <AdminSignIn />
+                        </motion.div>
+                    } />
+                                         <Route path="/admin/dashboard" element={
+                        <motion.div
+                            initial={{ opacity: 0, x: 20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            exit={{ opacity: 0, x: -20 }}
+                            transition={{ duration: 0.5 }}
+                        >
+                            <AdminDashboard />
                         </motion.div>
                     } />
                 </Routes>

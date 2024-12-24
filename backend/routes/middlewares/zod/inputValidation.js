@@ -9,15 +9,11 @@ const inputSchema = zod.object({
     password: zod
         .string()
         .min(10, 'Password must contain 10-12 characters')
-        .max(12, 'Password must contain 10-12 characters'),
-    college_email: zod
-        .string()
-        .email('Invalid email address')
+        .max(12, 'Password must contain 10-12 characters')
 });
 
 const validateInputs = (req, res, next) => {
     const result = inputSchema.safeParse(req.body);
-    
     if (result.success) {
         next();
     } else {
@@ -27,7 +23,7 @@ const validateInputs = (req, res, next) => {
             .join(' and ');
 
         res.json({
-            msg: errorMessage,
+            msg: "validation failed",
             success: false
         });
     }
