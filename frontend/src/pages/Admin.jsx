@@ -75,7 +75,9 @@ const AdminDashboard = () => {
           setTimeout(() => sirenAudio.pause(), 60000);
         }
       }
-      localStorage.setItem('sirenAlerts', JSON.stringify(data.sirens));
+      setTimeout(()=>{
+        localStorage.setItem('sirenAlerts', JSON.stringify(data.sirens));
+      }, 2000);
     } catch (err) {
       console.error('Failed to fetch sirens:', err);
     }
