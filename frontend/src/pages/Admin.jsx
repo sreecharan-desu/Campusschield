@@ -258,42 +258,54 @@ const AdminDashboard = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Navigation Bar */}
-      <nav className="bg-white shadow-lg border-b sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center space-x-4">
-              <h1 className="text-2xl font-bold text-indigo-600">Campus Shield Admin</h1>
-              <div className="hidden md:flex space-x-4 ml-8">
-                <div className="text-sm">
-                  <span className="text-gray-500">Users:</span>
-                  <span className="ml-1 font-semibold">{stats.totalUsers}</span>
-                </div>
-                <div className="text-sm">
-                  <span className="text-gray-500">Reports:</span>
-                  <span className="ml-1 font-semibold">{stats.totalReports}</span>
-                </div>
-                <div className="text-sm">
-                  <span className="text-gray-500">Active:</span>
-                  <span className="ml-1 font-semibold">{stats.activeReports}</span>
-                </div>
-              </div>
-            </div>
-            <div className="flex items-center space-x-4">
-              <Bell 
-                className={`h-5 w-5 ${sirenAlerts.length > 0 ? 'text-red-500 animate-bounce' : 'text-gray-500'}`} 
-                title={`${sirenAlerts.length} active alerts`}
-              />
-              <span className="text-gray-700">Welcome, {adminData.username}</span>
-              <button
-                onClick={handleLogout}
-                className="px-4 py-2 text-sm font-semibold text-white bg-red-600 rounded-md hover:bg-red-700 transition"
-              >
-                Logout
-              </button>
-            </div>
+      <nav className="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 shadow-lg border-b sticky top-0 z-50">
+  <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="flex justify-between items-center h-16">
+      {/* Left Section */}
+      <div className="flex items-center space-x-4">
+        <img src="/public/vite.svg" alt="Logo" className="h-10 w-10" />
+        <h1 className="text-2xl font-extrabold text-white">Campus Shield Admin</h1>
+        <div className="hidden md:flex space-x-4 ml-8 text-white">
+          <div className="text-sm">
+            <span className="text-gray-200">Users:</span>
+            <span className="ml-1 font-semibold">{stats.totalUsers}</span>
+          </div>
+          <div className="text-sm">
+            <span className="text-gray-200">Reports:</span>
+            <span className="ml-1 font-semibold">{stats.totalReports}</span>
+          </div>
+          <div className="text-sm">
+            <span className="text-gray-200">Active:</span>
+            <span className="ml-1 font-semibold">{stats.activeReports}</span>
           </div>
         </div>
-      </nav>
+      </div>
+
+      {/* Right Section */}
+      <div className="flex items-center space-x-6">
+        <div className="relative">
+          <Bell 
+            className={`h-6 w-6 ${sirenAlerts.length > 0 ? 'text-red-500 animate-bounce' : 'text-white'}`} 
+            title={`${sirenAlerts.length} active alerts`} 
+          />
+          {sirenAlerts.length > 0 && (
+            <span className="absolute top-0 right-0 inline-flex items-center justify-center h-4 w-4 text-xs font-bold text-white bg-red-500 rounded-full animate-pulse">
+              {sirenAlerts.length}
+            </span>
+          )}
+        </div>
+        <span className="text-white font-medium">Welcome, {adminData.username}</span>
+        <button
+          onClick={handleLogout}
+          className="px-4 py-2 text-sm font-semibold text-white bg-red-600 rounded-lg hover:bg-red-700 shadow-md transition-transform transform hover:scale-105"
+        >
+          Logout
+        </button>
+      </div>
+    </div>
+  </div>
+</nav>
+
 
       <main className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
         {/* Error Alert */}
@@ -479,12 +491,16 @@ const AdminDashboard = () => {
         <p className="text-sm text-gray-500">User ID: {report.userId || "Not Provided"}</p>
         
         <div className="flex space-x-2 mt-2">
-          <button
+          {report.Status !== 'Resolved' ? <>
+            <button
             onClick={() => handleStatusChange(report._id, 'Resolved')}
             className="px-4 py-2 bg-green-600 text-white text-sm rounded-md hover:bg-green-700 transition"
           >
             Mark Resolved
           </button>
+          </> : <>
+          <p className='text-green font-bold italic'>Resolved</p>
+          </>}
           <button
             onClick={() => handleDeleteReport(report._id)}
             className="px-4 py-2 bg-red-600 text-white text-sm rounded-md hover:bg-red-700 transition"
@@ -497,6 +513,9 @@ const AdminDashboard = () => {
   </div>
 )}{view === 'sirens' && (
   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    {sirenAlerts.length === 0 ? <>
+      <p className='text-gray font-bold text-center'> No Sirens found.</p>
+    </> : <></>}
     {sirenAlerts.map(alert => (
       <div
         key={alert._id}
