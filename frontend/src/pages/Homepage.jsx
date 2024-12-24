@@ -54,13 +54,14 @@ const SirenButton = () => {
 
   return (
     <>
-      <motion.button
-        onClick={() => setShowPopup(true)}
-        className="fixed left-1/2 -translate-x-1/2 bottom-16 w-16 h-16 rounded-full bg-gradient-to-br from-red-500 to-red-700 flex items-center justify-center shadow-lg hover:scale-105 transition-transform"
-        aria-label="Emergency Alert Button"
-      >
-        <span className="text-white text-3xl">🚨</span>
-      </motion.button>
+<motion.button
+  onClick={() => setShowPopup(true)}
+  className="fixed right-4 ml-10 mb-10 bottom-16 w-16 h-16 rounded-full bg-gradient-to-br from-red-500 to-red-700 flex items-center justify-center shadow-lg hover:scale-105 transition-transform"
+  aria-label="Emergency Alert Button"
+>
+  <span className="text-white text-3xl">🚨</span>
+</motion.button>
+
 
       <AnimatePresence>
         {showPopup && (
@@ -187,7 +188,7 @@ const Homepage = () => {
 
   return (
     <>
-      <div className="bg-gradient-to-br from-blue-200 via-black to-white text-white p-6 flex items-center justify-between shadow-lg">
+      <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-6 flex items-center justify-between shadow-lg">
         <div>
           {loading ? (
             <div className="animate-pulse">
@@ -286,16 +287,17 @@ const Homepage = () => {
       <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
     </svg>
   </button>
-</div>
+  </div>
 
 
         )}
       </div>
 
-      <div className="mt-96">
-        <SirenButton />
-        <BottomNavbar />
+      <div className="mt-32 flex justify-end pr-4">
+      <SirenButton />
       </div>
+      <BottomNavbar />
+
     </>
   );
 };
@@ -304,79 +306,82 @@ export default Homepage;
 
 
 const ReportCard = ({ report }) => {
-    const user = JSON.parse(localStorage.getItem("user") || "{}");
-  
-    return (
-      <div className="bg-white p-4 rounded-md shadow-sm border border-gray-200 w-full hover:shadow-md transition-shadow">
-        {/* Title and Status */}
-        <div className="flex justify-between items-center mb-2">
-          <h3 className="text-lg font-medium text-gray-800 truncate">{report.Title}</h3>
-          <span
-            className={`px-3 py-0.5 rounded-full text-xs font-medium ${
-              report.Status === "Pending"
-                ? "bg-yellow-100 text-yellow-700"
-                : "bg-green-100 text-green-700"
-            }`}
-          >
-            {report.Status}
+  const user = JSON.parse(localStorage.getItem("user") || "{}");
+
+  return (
+    <div className="bg-white p-4 rounded-md shadow-sm border border-gray-200 w-full hover:shadow-md transition-shadow mb-4">
+      {/* Title and Status */}
+      <div className="flex justify-between items-center mb-2">
+        <h3 className="text-lg font-medium text-gray-800 truncate">{report.Title}</h3>
+        <span
+          className={`px-3 py-0.5 rounded-full text-xs font-medium ${
+            report.Status === "Pending"
+              ? "bg-yellow-100 text-yellow-700"
+              : "bg-green-100 text-green-700"
+          }`}
+        >
+          {report.Status}
+        </span>
+      </div>
+
+      {/* Description */}
+      <p className="text-sm text-gray-700 mb-3 truncate">{report.Description}</p>
+
+      {/* Details */}
+      <div className="space-y-2">
+        <div className="flex items-center text-sm text-gray-800">
+          <FaUser className="mr-1.5 text-gray-500" />
+          <span>
+            <strong>Harasser:</strong> {report.HarasserDetails}
           </span>
         </div>
-  
-        {/* Description */}
-        <p className="text-sm text-gray-700 mb-3 truncate">{report.Description}</p>
-  
-        {/* Details */}
-        <div className="space-y-2">
-          <div className="flex items-center text-sm text-gray-800">
-            <FaUser className="mr-1.5 text-gray-500" />
-            <span>
-              <strong>Harasser:</strong> {report.HarasserDetails}
-            </span>
-          </div>
-          <div className="flex items-center text-sm text-gray-800">
-            <FaFlag className="mr-1.5 text-gray-500" />
-            <span>
-              <strong>Reported To:</strong> {report.WhomToReport}
-            </span>
-          </div>
-          <div className="flex items-center text-sm text-gray-800">
-            <FaClock className="mr-1.5 text-gray-500" />
-            <span>
-              <strong>Time:</strong>{" "}
-              {new Date(report.Time).toLocaleString(undefined, {
-                dateStyle: "medium",
-                timeStyle: "short",
-              })}
-            </span>
-          </div>
-          <div className="flex items-center text-sm text-gray-800">
-            <FaMapMarkerAlt className="mr-1.5 text-gray-500" />
-            <span>
-              <strong>Location:</strong>{" "}
-              <a
-                href={`https://www.google.com/maps?q=${report.Location.latitude},${report.Location.longitude}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-blue-500 hover:underline"
-              >
-                {report.Location.latitude}, {report.Location.longitude}
-              </a>
-            </span>
-          </div>
+        <div className="flex items-center text-sm text-gray-800">
+          <FaFlag className="mr-1.5 text-gray-500" />
+          <span>
+            <strong>Reported To:</strong> {report.WhomToReport}
+          </span>
         </div>
-  
-        {/* User Email */}
-        <div className="text-sm text-gray-600 mt-3">
-          {user?.college_email ? (
-            <span>
-              Updates will be sent to{" "}
-              <span className="font-medium text-gray-800">{user.college_email}</span>.
-            </span>
-          ) : (
-            <span className="text-red-500">User email not available.</span>
-          )}
+        <div className="flex items-center text-sm text-gray-800">
+          <FaClock className="mr-1.5 text-gray-500" />
+          <span>
+            <strong>Time:</strong>{" "}
+            {report.Time.toLocaleString().split("T")[0]},{report.Time.toLocaleString().split("T")[1].split(".")[0]} {report.Time.toLocaleString().split("T")[1].split(".")[0].split(":")[0] >= 12 ? "PM" : "AM"}
+    </span>
+        </div>
+        <div className="flex items-center text-sm text-gray-800">
+          <FaClock className="mr-1.5 text-gray-500" />
+          <span>
+            <strong>Created At:</strong>{" "}
+            {new Date(report.createdAt).toLocaleString("en-IN", { timeZone: "Asia/Kolkata" })}
+          </span>
+        </div>
+        <div className="flex items-center text-sm text-gray-800">
+          <FaMapMarkerAlt className="mr-1.5 text-gray-500" />
+          <span>
+            <strong>Location:</strong>{" "}
+            <a
+              href={`https://www.google.com/maps?q=${report.Location.latitude},${report.Location.longitude}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-500 hover:underline"
+            >
+              {report.Location.latitude}, {report.Location.longitude}
+            </a>
+          </span>
         </div>
       </div>
-    );
-  };
-  
+
+      {/* User Email */}
+      <div className="text-sm text-gray-600 mt-3">
+        {user?.college_email ? (
+          <span>
+            Updates will be sent to{" "}
+            <span className="font-medium text-gray-800">{user.college_email}</span>.
+          </span>
+        ) : (
+          <span className="text-red-500">User email not available.</span>
+        )}
+      </div>
+    </div>
+  );
+};
