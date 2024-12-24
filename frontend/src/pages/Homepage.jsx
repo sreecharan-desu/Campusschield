@@ -44,8 +44,13 @@ const SirenButton = () => {
   const handleSiren = async () => {
     try {
       const location = await fetch('https://ipapi.co/json/');
-            console.log(location)
-
+      console.log(location)
+      if (!location.ok) {
+          throw new Error('Failed to fetch location data');
+      }
+      const loc_data = await location.json();
+      const { latitude, longitude } = loc_data;
+      console.log(latitude, longitude)
       const token = localStorage.getItem("token");
       const response = await fetch(
         "https://campus-schield-backend-api.vercel.app/api/v1/user/sendsiren",        {
@@ -58,8 +63,8 @@ const SirenButton = () => {
             title: "Emergency Alert",
             description: "Emergency assistance needed",
             location: {
-              latitude: location.latitude,
-              longitude: location.longitude,
+              latitude: latitude,
+              longitude: longitude,
             },
           }),
         }
