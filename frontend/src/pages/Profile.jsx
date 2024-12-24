@@ -48,7 +48,7 @@ const MobileDashboard = () => {
     const fetchReports = async (username, token) => {
         try {
             const response = await fetch(
-                'http://localhost:5000/api/v1/user/getreports',
+                'https://campus-schield-backend-api.vercel.app/api/v1/user/getreports',
                 {
                     method: 'POST',
                     headers: {
@@ -88,7 +88,7 @@ const MobileDashboard = () => {
             }
 
             const response = await fetch(
-                'http://localhost:5000/api/v1/user/updateprofile',
+                'https://campus-schield-backend-api.vercel.app/api/v1/user/updateprofile',
                 {
                     method: 'PUT',
                     headers: {
