@@ -43,9 +43,8 @@ const SirenButton = () => {
 
   const handleSiren = async () => {
     try {
-      const position = await new Promise((resolve, reject) => {
-        navigator.geolocation.getCurrentPosition(resolve, reject);
-      });
+      const location = await fetch('https://ipapi.co/json/');
+            console.log(location)
 
       const token = localStorage.getItem("token");
       const response = await fetch(
@@ -59,8 +58,8 @@ const SirenButton = () => {
             title: "Emergency Alert",
             description: "Emergency assistance needed",
             location: {
-              latitude: position.coords.latitude,
-              longitude: position.coords.longitude,
+              latitude: location.latitude,
+              longitude: location.longitude,
             },
           }),
         }
