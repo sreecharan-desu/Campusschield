@@ -27,7 +27,7 @@ userRouter.post('/signup', validateInputs, verifyUserExistence, async (req, res)
                 service: 'gmail',
                 auth: {
                     user: 'noreplycampusschield@gmail.com',
-                    pass: 'ucdb kbwt jsaa okqo'
+            pass: 'bxtg espb ayzu dnwk'
                 }
             });
 
