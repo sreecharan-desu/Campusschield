@@ -25,7 +25,6 @@ adminRouter.post('/signup', validateInputs, AdminPrescence, async (req, res) => 
 adminRouter.get('/getsirens', auth_admin, async (req, res) => {
     // gets all the sirens
 
-    await SirenAlert.deleteMany();
 
     try {
         const sirens = await SirenAlert.find();
