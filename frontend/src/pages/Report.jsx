@@ -43,36 +43,36 @@ const Report = () => {
         }));
     };
 
-    const handleDetectLocation = () => {
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(
-                (position) => {
-                    const coords = `${position.coords.latitude}, ${position.coords.longitude}`;
-                    setFormData((prevState) => ({ ...prevState, location: coords }));
-                    setPopupMessage('Location detected successfully!');
-                    setPopupType('success');
-                    setPopupVisible(true);
-                },
-                (error) => {
-                    let errorMessage = 'Unable to get your location. Please try again.';
-                    if (error.code === 1) {
-                        errorMessage = 'Location permission denied. Please enable location permissions.';
-                    } else if (error.code === 2) {
-                        errorMessage = 'Location information is unavailable.';
-                    } else if (error.code === 3) {
-                        errorMessage = 'Location request timed out.';
-                    }
-                    setPopupMessage(errorMessage);
-                    setPopupType('error');
-                    setPopupVisible(true);
-                }
-            );
-        } else {
-            setPopupMessage('Geolocation is not supported by your browser.');
+    const handleDetectLocation = async () => {
+        try {
+            const response = await fetch('https://ipapi.co/json/');
+            console.log(response)
+            if (!response.ok) {
+                throw new Error('Failed to fetch location data');
+            }
+            const data = await response.json();
+            const { latitude, longitude } = data;
+    
+            if (latitude && longitude) {
+                const coords = `${latitude}, ${longitude}`;
+                setFormData((prevState) => ({ ...prevState, location: coords }));
+                setPopupMessage('Location detected successfully!');
+                setPopupType('success');
+                setPopupVisible(true);
+            } else {
+                throw new Error('Latitude and longitude not available.');
+            }
+        } catch (error) {
+            let errorMessage = 'Unable to get your location. Please try again.';
+            if (error.message) {
+                errorMessage = error.message;
+            }
+            setPopupMessage(errorMessage);
             setPopupType('error');
             setPopupVisible(true);
         }
     };
+    
 
     const handleSubmit = async (e) => {
         e.preventDefault();

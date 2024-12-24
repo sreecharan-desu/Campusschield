@@ -121,6 +121,21 @@ const MobileDashboard = () => {
                   setUpdateStatus({ type: '', message: '' })
                 },2000)
             }
+
+
+            try {
+                const response = await axios.get('https://campus-schield-backend-api.vercel.app/api/v1/user/details');
+                if (response.data.success) {
+                    localStorage.setItem('user', JSON.stringify(response.data.user));
+                    navigate('/profile');
+                } else {
+                    setFormError(response.data.msg);
+                    setTimeout(() => setFormError(''), 3000);
+                }
+            } catch (error) {
+                console.log('API Error:', error);
+            } 
+     
         } catch (error) {
             setUpdateStatus({ type: 'error', message: 'Failed to update profile' });
             setTimeout(()=>{
