@@ -462,6 +462,9 @@ const AdminDashboard = () => {
   </div>
 )}{view === 'reports' && (
   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    {getFilteredData(reports, 'reports').length === 0 ? <>
+      <p className='text-gray font-bold text-center'> No Reports found.</p>
+    </> : <></>}
     {getFilteredData(reports, 'reports').map(report => (
       <div
         key={report._id}
