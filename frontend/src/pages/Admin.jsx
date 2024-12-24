@@ -72,7 +72,7 @@ const AdminDashboard = () => {
         if (data.sirens.length > prevAlerts.length) {
           sirenAudio.play();
           sirenAudio.loop = true;
-          setTimeout(() => sirenAudio.pause(), 60000);
+          setTimeout(() => sirenAudio.pause(), 10000);
         }
       }
       setTimeout(()=>{
