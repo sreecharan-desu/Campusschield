@@ -1,26 +1,30 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Loader2, AlertCircle, UserX, Trash2, MapPin } from 'lucide-react';
+import { Loader2, AlertCircle, UserX, Trash2, MapPin, Filter, Download, Calendar, Search, Bell, Users, FileText, AlertTriangle } from 'lucide-react';
 
 const AdminDashboard = () => {
-  const [users, setUsers] = useState([]); // State to store user data
-  const [reports, setReports] = useState([]); // State to store report data
-  const [sirenAlerts, setSirenAlerts] = useState([]); // State to store siren alerts
-  const [loading, setLoading] = useState(true); // State for loading indicator
-  const [error, setError] = useState(''); // State for error messages
-  const [searchTerm, setSearchTerm] = useState(''); // State for search term
-  const [filterStatus, setFilterStatus] = useState(''); // State for report status filter
-  const [view, setView] = useState('users'); // State to toggle between users and reports view
+  // State Management
+  const [users, setUsers] = useState([]);
+  const [reports, setReports] = useState([]);
+  const [sirenAlerts, setSirenAlerts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterStatus, setFilterStatus] = useState('');
+  const [view, setView] = useState('users');
+  const [dateRange, setDateRange] = useState('all');
+  const [collegeFilter, setCollegeFilter] = useState('');
+  const [courseFilter, setCourseFilter] = useState('');
+  const [yearFilter, setYearFilter] = useState('');
+  const [sortBy, setSortBy] = useState('newest');
 
   const navigate = useNavigate();
-  const adminData = JSON.parse(localStorage.getItem('adminData') || '{}'); // Admin data from localStorage
-  const token = localStorage.getItem('adminToken'); // Auth token from localStorage
+  const adminData = JSON.parse(localStorage.getItem('adminData') || '{}');
+  const token = localStorage.getItem('adminToken');
+  const API_BASE_URL = 'https://campus-schield-backend-api.vercel.app/api/v1/admin';
+  let sirenAudio = new Audio('/public/siren.mp3');
 
-  const API_BASE_URL = 'https://campus-schield-backend-api.vercel.app/api/v1/admin'; // Base API URL
-
-  let sirenAudio = new Audio('/public/siren.mp3'); // Siren audio file
-
-  // Fetch user and report data from API
+  // Fetch Data Functions
   const fetchData = async () => {
     try {
       const [usersResponse, reportsResponse] = await Promise.all([
@@ -40,17 +44,16 @@ const AdminDashboard = () => {
       const reportsData = await reportsResponse.json();
 
       if (usersData.success && reportsData.success) {
-        setUsers(usersData.users); // Update users state
-        setReports(reportsData.reports); // Update reports state
+        setUsers(usersData.users);
+        setReports(reportsData.reports);
       }
     } catch (err) {
       setError('Failed to fetch data');
     } finally {
-      setLoading(false); // Disable loading indicator
+      setLoading(false);
     }
   };
 
-  // Fetch siren alerts from API
   const fetchSirenAlerts = async () => {
     try {
       const response = await fetch(`${API_BASE_URL}/getsirens`, {
@@ -62,51 +65,44 @@ const AdminDashboard = () => {
       }
 
       const data = await response.json();
+      const prevAlerts = JSON.parse(localStorage.getItem('sirenAlerts') || '[]');
+      localStorage.setItem('sirenAlerts', JSON.stringify(data.sirens));
+
       if (data.success) {
-        setSirenAlerts(data.sirens); // Update siren alerts state
-
-        if (data.sirens.length > sirenAlerts.length) {
-          sirenAudio.play(); // Play siren audio
-          sirenAudio.loop = true; // Enable looping
-
-          setTimeout(() => {
-            sirenAudio.pause(); // Pause audio after 1 minute
-          }, 60000);
+        setSirenAlerts(data.sirens);
+        if (data.sirens.length > prevAlerts.length) {
+          sirenAudio.play();
+          sirenAudio.loop = true;
+          setTimeout(() => sirenAudio.pause(), 60000);
         }
       }
     } catch (err) {
-      console.error('Failed to fetch sirens', err);
+      console.error('Failed to fetch sirens:', err);
     }
   };
 
-  // Initial data fetch and siren polling setup
+  // Effect Hooks
   useEffect(() => {
     if (!token) {
-      navigate('/admin/signin'); // Redirect to signin if no token
+      navigate('/admin/signin');
       return;
     }
     fetchData();
-
-    const sirenInterval = setInterval(fetchSirenAlerts, 2000); // Poll for sirens every 2 seconds
-    return () => clearInterval(sirenInterval); // Cleanup interval on unmount
+    const sirenInterval = setInterval(fetchSirenAlerts, 2000);
+    return () => clearInterval(sirenInterval);
   }, [token, navigate]);
 
-  // Pause siren audio on spacebar press
-  const handleKeydown = (e) => {
-    if (e.code === 'Space') {
-      sirenAudio.pause();
-    }
-  };
-
-  // Add and remove event listener for keydown
   useEffect(() => {
-    window.addEventListener('keydown', handleKeydown);
-    return () => {
-      window.removeEventListener('keydown', handleKeydown);
+    const handleKeydown = (e) => {
+      if (e.code === 'Space') {
+        sirenAudio.pause();
+      }
     };
+    window.addEventListener('keydown', handleKeydown);
+    return () => window.removeEventListener('keydown', handleKeydown);
   }, []);
 
-  // Delete a user by ID
+  // Handler Functions
   const handleDeleteUser = async (userId) => {
     try {
       const response = await fetch(`${API_BASE_URL}/deleteuser?userId=${userId}`, {
@@ -114,20 +110,17 @@ const AdminDashboard = () => {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      if (!response.ok) {
-        throw new Error('Failed to delete user');
-      }
+      if (!response.ok) throw new Error('Failed to delete user');
 
       const data = await response.json();
       if (data.success) {
-        setUsers(users.filter((user) => user._id !== userId)); // Update users state
+        setUsers(users.filter((user) => user._id !== userId));
       }
     } catch (err) {
       setError('Failed to delete user');
     }
   };
 
-  // Change the status of a report
   const handleStatusChange = async (reportId, newStatus) => {
     try {
       const response = await fetch(`${API_BASE_URL}/changestatus`, {
@@ -139,24 +132,19 @@ const AdminDashboard = () => {
         body: JSON.stringify({ id: reportId, status: newStatus }),
       });
 
-      if (!response.ok) {
-        throw new Error('Failed to update status');
-      }
+      if (!response.ok) throw new Error('Failed to update status');
 
       const data = await response.json();
       if (data.success) {
-        setReports(
-          reports.map((report) =>
-            report._id === reportId ? { ...report, Status: newStatus } : report
-          )
-        ); // Update reports state
+        setReports(reports.map((report) =>
+          report._id === reportId ? { ...report, Status: newStatus } : report
+        ));
       }
     } catch (err) {
       setError('Failed to update status');
     }
   };
 
-  // Delete a report by ID
   const handleDeleteReport = async (reportId) => {
     try {
       const response = await fetch(`${API_BASE_URL}/deletereport`, {
@@ -168,56 +156,133 @@ const AdminDashboard = () => {
         body: JSON.stringify({ id: reportId }),
       });
 
-      if (!response.ok) {
-        throw new Error('Failed to delete report');
-      }
+      if (!response.ok) throw new Error('Failed to delete report');
 
       const data = await response.json();
       if (data.success) {
-        setReports(reports.filter((report) => report._id !== reportId)); // Update reports state
+        setReports(reports.filter((report) => report._id !== reportId));
       }
     } catch (err) {
       setError('Failed to delete report');
     }
   };
 
-  // Logout admin and clear localStorage
   const handleLogout = () => {
     localStorage.removeItem('adminToken');
     localStorage.removeItem('adminData');
     navigate('/admin/signin');
   };
 
-  // Filter reports based on search term and status
-  const filteredReports = reports.filter(
-    (report) =>
-      (!filterStatus || report.Status === filterStatus) &&
-      (report.Title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        report.Description.toLowerCase().includes(searchTerm.toLowerCase()))
-  );
+  // Utility Functions
+  const exportToCSV = (data, filename) => {
+    const headers = Object.keys(data[0]).join(',');
+    const rows = data.map(item => Object.values(item).join(','));
+    const csv = [headers, ...rows].join('\n');
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${filename}-${new Date().toISOString()}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+  };
 
-  // Filter users based on search term
-  const filteredUsers = users.filter((user) =>
-    user.Username.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    user.CollegeEmail.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filterByDate = (items) => {
+    const now = new Date();
+    switch (dateRange) {
+      case 'today':
+        return items.filter(item => 
+          new Date(item.createdAt).toDateString() === now.toDateString()
+        );
+      case 'week':
+        const weekAgo = new Date(now - 7 * 24 * 60 * 60 * 1000);
+        return items.filter(item => 
+          new Date(item.createdAt) > weekAgo
+        );
+      case 'month':
+        const monthAgo = new Date(now - 30 * 24 * 60 * 60 * 1000);
+        return items.filter(item => 
+          new Date(item.createdAt) > monthAgo
+        );
+      default:
+        return items;
+    }
+  };
 
-  // Show loading spinner while data is being fetched
+  const getFilteredData = (data, type) => {
+    let filtered = filterByDate(data);
+
+    if (type === 'users') {
+      filtered = filtered.filter(user =>
+        (user.Username?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+         user.CollegeEmail?.toLowerCase().includes(searchTerm.toLowerCase())) &&
+        (!collegeFilter || user.College === collegeFilter) &&
+        (!courseFilter || user.Course === courseFilter) &&
+        (!yearFilter || user.Year === yearFilter)
+      );
+    } else if (type === 'reports') {
+      filtered = filtered.filter(report =>
+        (report.Title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+         report.Description?.toLowerCase().includes(searchTerm.toLowerCase())) &&
+        (!filterStatus || report.Status === filterStatus)
+      );
+    }
+
+    return filtered.sort((a, b) => 
+      sortBy === 'newest' 
+        ? new Date(b.createdAt) - new Date(a.createdAt)
+        : new Date(a.createdAt) - new Date(b.createdAt)
+    );
+  };
+
+  // Stats Calculation
+  const stats = {
+    totalUsers: users.length,
+    totalReports: reports.length,
+    totalSirens: sirenAlerts.length,
+    activeReports: reports.filter(r => r.Status !== 'Resolved').length,
+    recentUsers: filterByDate(users).length,
+    recentReports: filterByDate(reports).length
+  };
+
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin" />
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <Loader2 className="h-8 w-8 animate-spin text-indigo-600" />
       </div>
     );
   }
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <nav className="bg-white shadow-lg border-b">
+      {/* Navigation Bar */}
+      <nav className="bg-white shadow-lg border-b sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            <h1 className="text-2xl font-bold text-indigo-600">Campus Shield Admin</h1>
             <div className="flex items-center space-x-4">
+              <h1 className="text-2xl font-bold text-indigo-600">Campus Shield Admin</h1>
+              <div className="hidden md:flex space-x-4 ml-8">
+                <div className="text-sm">
+                  <span className="text-gray-500">Users:</span>
+                  <span className="ml-1 font-semibold">{stats.totalUsers}</span>
+                </div>
+                <div className="text-sm">
+                  <span className="text-gray-500">Reports:</span>
+                  <span className="ml-1 font-semibold">{stats.totalReports}</span>
+                </div>
+                <div className="text-sm">
+                  <span className="text-gray-500">Active:</span>
+                  <span className="ml-1 font-semibold">{stats.activeReports}</span>
+                </div>
+              </div>
+            </div>
+            <div className="flex items-center space-x-4">
+              <Bell 
+                className={`h-5 w-5 ${sirenAlerts.length > 0 ? 'text-red-500 animate-bounce' : 'text-gray-500'}`} 
+                title={`${sirenAlerts.length} active alerts`}
+              />
               <span className="text-gray-700">Welcome, {adminData.username}</span>
               <button
                 onClick={handleLogout}
@@ -230,146 +295,237 @@ const AdminDashboard = () => {
         </div>
       </nav>
 
-      <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+      <main className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+        {/* Error Alert */}
         {error && (
-          <div className="mb-4 bg-red-100 border-l-4 border-red-500 text-red-700 p-4">
+          <div className="mb-4 bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-md">
             <AlertCircle className="inline mr-2" />
             {error}
           </div>
         )}
 
-        <div className="mb-4 bg-yellow-100 p-4 rounded-md shadow">
-          <h2 className="text-lg font-bold">Siren Alerts</h2>
-          {sirenAlerts.length === 0 ? (
-            <p className="text-sm text-gray-600">No siren alerts at the moment.</p>
-          ) : (
-            sirenAlerts.map((alert, index) => (
-              <p key={index} className="text-sm text-gray-700">
-                {alert.message} ({new Date(alert.timestamp).toLocaleString()})
-              </p>
-            ))
-          )}
-        </div>
-
-        <div className="mb-4 flex justify-between items-center">
-          <div>
-            <button
-              className={`px-4 py-2 rounded-l-md ${
-                view === 'users' ? 'bg-indigo-600 text-white' : 'bg-gray-200'
-              }`}
-              onClick={() => setView('users')}
-            >
-              Users
-            </button>
-            <button
-              className={`px-4 py-2 rounded-r-md ${
-                view === 'reports' ? 'bg-indigo-600 text-white' : 'bg-gray-200'
-              }`}
-              onClick={() => setView('reports')}
-            >
-              Reports
-            </button>
-          </div>
-
-          <input
-            type="text"
-            className="border p-2 rounded-md"
-            placeholder="Search..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-
-          {view === 'reports' && (
-            <select
-              className="border p-2 rounded-md"
-              value={filterStatus}
-              onChange={(e) => setFilterStatus(e.target.value)}
-            >
-              <option value="">All</option>
-              <option value="Pending">Pending</option>
-              <option value="In Progress">In Progress</option>
-              <option value="Resolved">Resolved</option>
-              <option value="Rejected">Rejected</option>
-            </select>
-          )}
-        </div>
-
-        {view === 'users' ? (
-          <div className="bg-white p-6 rounded-lg shadow">
-            <h2 className="text-2xl font-bold text-gray-700 mb-4">Users ({filteredUsers.length})</h2>
-            <div className="space-y-4">
-              {filteredUsers.length === 0 ? (
-                <p className="text-gray-500">No users found.</p>
-              ) : (
-                filteredUsers.map((user) => (
-                  <div
-                    key={user._id}
-                    className="flex items-center justify-between border-b pb-4 mb-4"
-                  >
-                    <div>
-                      <p className="font-bold text-gray-700">{user.Username}</p>
-                      <p className="text-gray-500">{user.CollegeEmail}</p>
-                    </div>
-                    <button
-                      onClick={() => handleDeleteUser(user._id)}
-                      className="px-4 py-2 text-sm font-semibold text-white bg-red-600 rounded-md hover:bg-red-700 transition"
-                    >
-                      <Trash2 className="inline-block mr-2" />
-                      Delete
-                    </button>
-                  </div>
-                ))
-              )}
+        {/* Control Panel */}
+        <div className="mb-6 space-y-4">
+          {/* View Toggles */}
+          <div className="flex flex-wrap gap-4 items-center justify-between">
+            <div className="flex space-x-2">
+              {['users', 'reports', 'sirens'].map((v) => (
+                <button
+                  key={v}
+                  className={`px-4 py-2 rounded-md transition ${
+                    view === v 
+                      ? 'bg-indigo-600 text-white shadow-md' 
+                      : 'bg-white text-gray-600 hover:bg-gray-50'
+                  }`}
+                  onClick={() => setView(v)}
+                >
+                  {v.charAt(0).toUpperCase() + v.slice(1)}
+                </button>
+              ))}
+            </div>
+            
+            <div className="flex space-x-2">
+              <select
+                value={dateRange}
+                onChange={(e) => setDateRange(e.target.value)}
+                className="px-3 py-2 bg-white border rounded-md focus:ring-2 focus:ring-indigo-500"
+              >
+                <option value="all">All Time</option>
+                <option value="today">Today</option>
+                <option value="week">This Week</option>
+                <option value="month">This Month</option>
+              </select>
+              
+              <button
+                onClick={() => exportToCSV(
+                  view === 'users' ? users : view === 'reports' ? reports : sirenAlerts,
+                  view
+                )}
+                className="p-2 text-gray-600 hover:text-gray-900 bg-white rounded-md shadow-sm"
+              >
+                <Download className="h-5 w-5" />
+              </button>
             </div>
           </div>
-        ) : (
-          <div className="bg-white p-6 rounded-lg shadow">
-            <h2 className="text-2xl font-bold text-gray-700 mb-4">Reports ({filteredReports.length})</h2>
-            <div className="space-y-4">
-              {filteredReports.length === 0 ? (
-                <p className="text-gray-500">No reports found.</p>
-              ) : (
-                filteredReports.map((report) => (
-                  <div
-                    key={report._id}
-                    className="flex flex-col border-b pb-4 mb-4"
-                  >
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="font-bold text-gray-700">{report.Title}</p>
-                        <p className="text-gray-500">{report.Description}</p>
-                        <p className="text-sm text-gray-400">
-                          {new Date(report.CreatedAt).toLocaleString()}
-                        </p>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <select
-                          value={report.Status}
-                          onChange={(e) =>
-                            handleStatusChange(report._id, e.target.value)
-                          }
-                          className="border p-2 rounded-md"
-                        >
-                          <option value="Pending">Pending</option>
-                          <option value="In Progress">In Progress</option>
-                          <option value="Resolved">Resolved</option>
-                          <option value="Rejected">Rejected</option>
-                        </select>
-                        <button
-                          onClick={() => handleDeleteReport(report._id)}
-                          className="px-4 py-2 text-sm font-semibold text-white bg-red-600 rounded-md hover:bg-red-700 transition"
-                        >
-                          <Trash2 className="inline-block mr-2" />
-                          Delete
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                ))
-              )}
+
+          {/* Filters */}
+          <div className="flex flex-wrap gap-4 items-center">
+            <div className="relative flex-grow max-w-md">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+              <input
+                type="text"
+                className="w-full pl-10 pr-4 py-2 border rounded-md focus:ring-2 focus:ring-indigo-500"
+                placeholder="Search..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
             </div>
+            
+            {view === 'users' && (
+              <>
+                <select
+                  value={collegeFilter}
+                  onChange={(e) => setCollegeFilter(e.target.value)}
+                  className="px-3 py-2 bg-white border rounded-md"
+                >
+                  <option value="">All Colleges</option>
+                  {[...new Set(users.map(u => u.College))].map(college => (
+                    <option key={college} value={college}>{college}</option>
+                  ))}
+                </select>
+
+                <select
+                  value={courseFilter}
+                  onChange={(e) => setCourseFilter(e.target.value)}
+                  className="px-3 py-2 bg-white border rounded-md"
+                >
+                  <option value="">All Courses</option>
+                  {[...new Set(users.map(u => u.Course))].map(course => (
+                    <option key={course} value={course}>{course}</option>
+                  ))}
+                </select>
+
+                <select
+                  value={yearFilter}
+                  onChange={(e) => setYearFilter(e.target.value)}
+                  className="px-3 py-2 bg-white border rounded-md"
+                >
+                  <option value="">All Years</option>
+                  {[...new Set(users.map(u => u.Year))].sort().map(year => (
+                    <option key={year} value={year}>{year}</option>
+                  ))}
+                </select>
+              </>
+            )}
+
+            {view === 'reports' && (
+              <select
+                value={filterStatus}
+                onChange={(e) => setFilterStatus(e.target.value)}
+                className="px-3 py-2 bg-white border rounded-md"
+              >
+                <option value="">All Statuses</option>
+                {[...new Set(reports.map(r => r.Status))].map(status => (
+                  <option key={status} value={status}>{status}</option>
+                ))}
+              </select>
+            )}
           </div>
-        )}
+        </div>
+
+        {/* Data View */}
+        <div className="mt-4">
+        {view === 'users' && (
+  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    {getFilteredData(users, 'users').map(user => (
+      <div
+        key={user._id}
+        className="p-4 bg-white shadow rounded-md border"
+      >
+        <h3 className="text-lg font-semibold text-gray-800">
+          {user.Username || "Not Provided"}
+        </h3>
+        <p className="text-sm text-gray-600">{user.CollegeEmail || "Not Provided"}</p>
+        <p className="text-sm text-gray-500">College: {user.College || "Not Provided"}</p>
+        <p className="text-sm text-gray-500">Course: {user.Course || "Not Provided"}</p>
+        <p className="text-sm text-gray-500">Year: {user.Year || "Not Provided"}</p>
+        <p className="text-sm text-gray-500">Personal Email: {user.PersonalEmail || "Not Provided"}</p>
+        <p className="text-sm text-gray-500">Phone: {user.Phone || "Not Provided"}</p>
+        <p className="text-sm text-gray-500">Address: {user.Address || "Not Provided"}</p>
+        <p className="text-sm text-gray-500">Blood Group: {user.BloodGroup || "Not Provided"}</p>
+        <p className="text-sm text-gray-500">Medical Conditions: {user.MedicalConditions || "Not Provided"}</p>
+        <p className="text-sm text-gray-500">Allergies: {user.Allergies || "Not Provided"}</p>
+        <p className="text-sm text-gray-500">Medications: {user.Medications || "Not Provided"}</p>
+        <p className="text-sm text-gray-500">Emergency Contact: {user.EmergencyContact || "Not Provided"}</p>
+        <p className="text-sm text-gray-500">Created At: {user.createdAt || "Not Provided"}</p>
+        <p className="text-sm text-gray-500">Updated At: {user.updatedAt || "Not Provided"}</p>
+        <button
+          onClick={() => handleDeleteUser(user._id)}
+          className="mt-2 px-4 py-2 bg-red-600 text-white text-sm rounded-md hover:bg-red-700 transition"
+        >
+          Delete User
+        </button>
+      </div>
+    ))}
+  </div>
+)}{view === 'reports' && (
+  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    {getFilteredData(reports, 'reports').map(report => (
+      <div
+        key={report._id}
+        className="p-4 bg-white shadow rounded-md border"
+      >
+        <h3 className="text-lg font-semibold text-gray-800">
+          {report.Title || "Not Provided"}
+        </h3>
+        <p className="text-sm text-gray-600">{report.Description || "Not Provided"}</p>
+        <p className="text-sm text-gray-500">Status: {report.Status || "Not Provided"}</p>
+        <p className="text-sm text-gray-500">Time: {report.Time ? new Date(report.Time).toLocaleString() : "Not Provided"}</p>
+        <p className="text-sm text-gray-500">Created: {report.createdAt ? new Date(report.createdAt).toLocaleString() : "Not Provided"}</p>
+        <p className="text-sm text-gray-500">
+  <a 
+    href={`https://www.google.com/maps?q=${report.Location.latitude},${report.Location.longitude}`} 
+    target="_blank" 
+    rel="noopener noreferrer" 
+    className="text-blue-500 underline"
+  >
+    Location: {report.Location.latitude}, {report.Location.longitude}
+  </a>
+</p>        <p className="text-sm text-gray-500">Harasser Details: {report.HarasserDetails || "Not Provided"}</p>
+        <p className="text-sm text-gray-500">Video: {report.VideoLink || "Not Provided"}</p>
+        <p className="text-sm text-gray-500">Image: {report.ImageLink || "Not Provided"}</p>
+        <p className="text-sm text-gray-500">Audio: {report.AudioLink || "Not Provided"}</p>
+        <p className="text-sm text-gray-500">Report To: {report.WhomToReport || "Not Provided"}</p>
+        <p className="text-sm text-gray-500">User ID: {report.userId || "Not Provided"}</p>
+        
+        <div className="flex space-x-2 mt-2">
+          <button
+            onClick={() => handleStatusChange(report._id, 'Resolved')}
+            className="px-4 py-2 bg-green-600 text-white text-sm rounded-md hover:bg-green-700 transition"
+          >
+            Mark Resolved
+          </button>
+          <button
+            onClick={() => handleDeleteReport(report._id)}
+            className="px-4 py-2 bg-red-600 text-white text-sm rounded-md hover:bg-red-700 transition"
+          >
+            Delete Report
+          </button>
+        </div>
+      </div>
+    ))}
+  </div>
+)}{view === 'sirens' && (
+  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    {sirenAlerts.map(alert => (
+      <div
+        key={alert._id}
+        className="p-4 bg-white shadow rounded-md border"
+      >
+        <h3 className="text-lg font-semibold text-gray-800">
+          {alert.Title}
+        </h3>
+        <p className="text-sm text-gray-600">{alert.Description}</p>
+        <p className="text-sm text-gray-500">
+  <a 
+    href={`https://www.google.com/maps?q=${alert.Location.latitude},${alert.Location.longitude}`} 
+    target="_blank" 
+    rel="noopener noreferrer" 
+    className="text-blue-500 underline"
+  >
+    Location: {alert.Location.latitude}, {alert.Location.longitude}
+  </a>
+</p>
+        <p className="text-sm text-gray-500">
+          Time: {new Date(alert.Time).toLocaleString()}
+        </p>
+      </div>
+    ))}
+  </div>
+)}
+
+
+        </div>
       </main>
     </div>
   );
@@ -377,3 +533,4 @@ const AdminDashboard = () => {
 
 export default AdminDashboard;
 
+                
