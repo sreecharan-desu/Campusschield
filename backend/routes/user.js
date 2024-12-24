@@ -177,7 +177,7 @@ userRouter.get('/details', auth_user, async (req, res) => {
     
 
 //(get) -end points
-userRouter.get('/getreports', auth_user, async (req, res) => {
+userRouter.post('/getreports', auth_user, async (req, res) => {
     //returns all the reports of the user
     try {
         const authorization = req.headers.authorization;

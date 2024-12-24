@@ -1,4 +1,4 @@
-import React from 'react';import toast from 'react-hot-toast';
+import React, { useEffect, useState } from 'react';import toast from 'react-hot-toast';
 import BottomNavbar from '../components/BottomNavbar';
 import { Navigate, useNavigate } from 'react-router-dom';
 
@@ -96,46 +96,118 @@ const SirenButton = () => {
     );
 };
 
-const Homepage = () => {
-    const [isAuth, setIsAuth] = React.useState(false);
-    const navigate = useNavigate();
-    React.useEffect(() => {
-        const token = localStorage.getItem('token');
-        setIsAuth(!!token);
-    }, []);
 
-        // Check if user is authenticated
-        const isAuthenticated = () => {
-            const token = localStorage.getItem('token');
-            return token && token !== '' && token !== 'undefined' && token !== null;
-        };
+const Homepage = () => {
+    const [isAuth, setIsAuth] = useState(false);
+    const [reports, setReports] = useState([]);
+    const navigate = useNavigate();
+    useEffect(() => {
+        const token = localStorage.getItem('token');
+        const user = JSON.parse(localStorage.getItem('user')); // Ensure proper parsing of stored user data
+    
+        setIsAuth(!!token);
+    
+        if (token && user) {
+            fetch('http://localhost:5000/api/v1/user/getreports', {
+                method: 'POST', // Explicit POST request
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json', // Specify JSON content type
+                },
+                body: JSON.stringify({ username: user.username }), // Correctly serialize the username
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        setReports(data.reports); // Update state with fetched reports
+                    } else {
+                        console.error('Failed to fetch reports:', data.msg);
+                    }
+                })
+                .catch(error => console.error('Error fetching reports:', error));
+        }
+    }, []);
+    
+    const handleNavigate = (route) => {
+        if (isAuth) {
+            navigate(route);
+        } else {
+            navigate('/signin');
+        }
+    };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-blue-700 to-blue-500 relative overflow-hidden">
-            <div className="absolute inset-0 bg-[url('/path/to/noise-pattern.png')] opacity-5"></div>
-            <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
+        <div className="min-h-screen bg-gradient-to-br from-indigo-800 via-purple-700 to-blue-500 relative overflow-hidden">
+            {/* Background noise and overlay */}
+            <div className="absolute inset-0 bg-[url('/path/to/noise-pattern.png')] opacity-10 pointer-events-none"></div>
+            <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent pointer-events-none"></div>
+
             <div className="flex flex-col items-center justify-center min-h-screen px-4 pb-16 relative">
-                <div className="animate-[fadeIn_1s_ease-out]">
-                    <h1 className="text-5xl sm:text-6xl md:text-8xl font-bold text-white mb-8 sm:mb-10 tracking-tight text-center 
-                    [text-shadow:_0_4px_20px_rgb(0_0_0_/_40%)] animate-[slideDown_0.5s_ease-out]">
-                        Welcome to CampusSchield
-                    </h1>
-                    <p className="text-2xl sm:text-3xl md:text-4xl text-blue-50 mb-12 sm:mb-14 px-4 leading-relaxed text-center 
-                    [text-shadow:_0_2px_10px_rgb(0_0_0_/_30%)] max-w-4xl mx-auto">
-                        Ensuring safety and security across your campus community
-                    </p>
-                    <div className="space-y-4 sm:space-y-0 sm:space-x-6 flex flex-col sm:flex-row justify-center">
-                        <button className="bg-white text-blue-700 hover:bg-blue-50 font-bold py-5 px-10 rounded-2xl 
-                        shadow-2xl transition duration-300 transform hover:scale-105 hover:rotate-1 text-lg" onClick={()=>{if (isAuthenticated()) {navigate('/create-report')} else {navigate('/signin')}}}>
-                            Create Report
-                        </button>
-                        <button className="bg-transparent border-2 border-white text-white hover:bg-white/10 font-bold 
-                        py-5 px-10 rounded-2xl shadow-2xl transition duration-300 transform hover:scale-105 hover:-rotate-1 text-lg">
-                            Learn More
-                        </button>
+                {isAuth ? (
+                    <div className="w-full max-w-5xl mx-auto animate-[fadeIn_0.8s_ease-out]">
+                        <h1 className="text-6xl md:text-7xl font-extrabold text-white mb-6 tracking-tight text-center 
+                        [text-shadow:_0_5px_25px_rgba(0,0,0,0.7)]">
+                            Welcome Back, <span className="text-yellow-300">John!</span>
+                        </h1>
+                        <p className="text-xl md:text-2xl text-gray-200 mb-10 text-center leading-relaxed max-w-3xl mx-auto">
+                            Stay updated and explore your campus safety dashboard.
+                        </p>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
+                            {reports.map((report, index) => (
+                                <div key={index} className="bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition-transform transform hover:scale-105">
+                                    <h3 className="text-xl font-semibold text-indigo-700 mb-4">{report.title}</h3>
+                                    <p className="text-gray-600">{report.description}</p>
+                                </div>
+                            ))}
+                        </div>
+
+                        <div className="flex justify-center space-x-6">
+                            <button
+                                onClick={() => handleNavigate('/create-report')}
+                                className="bg-gradient-to-r from-green-500 via-green-600 to-green-700 text-white font-bold py-4 px-8 rounded-lg 
+                                shadow-lg hover:shadow-xl transition-transform transform hover:scale-105 text-lg"
+                            >
+                                Create Report
+                            </button>
+                            <button
+                                onClick={() => handleNavigate('/notifications')}
+                                className="bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 text-white font-bold py-4 px-8 rounded-lg 
+                                shadow-lg hover:shadow-xl transition-transform transform hover:scale-105 text-lg"
+                            >
+                                View Notifications
+                            </button>
+                        </div>
                     </div>
-                </div>
+                ) : (
+                    <div className="animate-[fadeIn_0.8s_ease-out]">
+                        <h1 className="text-6xl md:text-7xl font-extrabold text-white mb-8 tracking-tight text-center 
+                        [text-shadow:_0_5px_25px_rgba(0,0,0,0.7)]">
+                            Welcome to CampusSchield
+                        </h1>
+                        <p className="text-xl md:text-2xl text-gray-200 mb-12 leading-relaxed text-center max-w-3xl mx-auto">
+                            Ensuring safety and security across your campus community.
+                        </p>
+
+                        <div className="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-6">
+                            <button
+                                onClick={() => handleNavigate('/create-report')}
+                                className="bg-white text-indigo-700 font-bold py-4 px-8 rounded-lg shadow-lg hover:shadow-xl 
+                                transition-transform transform hover:scale-105 text-lg"
+                            >
+                                Create Report
+                            </button>
+                            <button
+                                className="bg-transparent border-2 border-white text-white font-bold py-4 px-8 rounded-lg shadow-lg hover:shadow-xl 
+                                transition-transform transform hover:scale-105 text-lg hover:bg-white/10"
+                            >
+                                Learn More
+                            </button>
+                        </div>
+                    </div>
+                )}
             </div>
+
             <SirenButton />
             <BottomNavbar />
         </div>

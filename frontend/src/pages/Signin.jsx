@@ -54,7 +54,7 @@ const Signin = () => {
                 // Store user data in localStorage
                 localStorage.setItem('user', JSON.stringify(response.data.user));
                 // Handle successful signin
-                navigate('/dashboard');
+                navigate('/profile');
             } else {
                 setApiError(response.data.msg || 'Sign in failed. Please try again.');
             }

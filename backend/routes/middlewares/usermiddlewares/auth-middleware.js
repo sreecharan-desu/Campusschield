@@ -4,10 +4,7 @@ const { User } = require('../../../db/db');
 
 const auth_user = async(req,res,next)=>{
 
-
     const authorization = req.headers.authorization;
-    const username = req.body.username;
-
 
     if(!authorization){ 
         return res.json({
@@ -21,15 +18,7 @@ const auth_user = async(req,res,next)=>{
         const token = authorization.split(' ')[1];  // removing the Bearer
         const Username = jwt.verify(token, JWT_KEY);
         const Current_user = await current_user(Username)
-
-        if(Current_user.Username !== username){
-            res.json({
-                msg : 'Auth Failed (Invalid Token)',
-                success : false
-            })
-        }else{
-            next();
-        }
+        next();
     }
     catch(e){
         res.json({

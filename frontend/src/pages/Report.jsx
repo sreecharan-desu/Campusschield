@@ -22,13 +22,31 @@ const Report = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            // TODO: Replace with your actual API endpoint
-            const response = await fetch('/api/reports', {
+
+            // Function to transform the location
+            function transformLocation(locationStr) {
+                const [latitude, longitude] = locationStr.split(',').map(coord => parseFloat(coord).toFixed(2)); 
+                return {
+                    latitude: parseFloat(latitude),
+                    longitude: parseFloat(longitude)
+                };
+            }
+
+            // Creating the new object
+            const newObject = {
+                ...formData, // Copy the existing fields
+                location: transformLocation(formData.location), // Replace location with the transformed one
+            };
+
+            newObject.username = localStorage.getItem('user').username;
+
+            const response = await fetch('https://campus-schield-backend-api.vercel.app/api/v1/user/createreport', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
                 },
-                body: JSON.stringify(formData)
+                body: JSON.stringify(newObject)
             });
 
             if (response.ok) {
