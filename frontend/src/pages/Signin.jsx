@@ -46,7 +46,7 @@ const Signin = () => {
             const validatedData = signInSchema.parse(formData);
 
             // Make API call
-            const response = await axios.post('https://campus-schield-backend-api.vercel.app/api/v1/user/signin', validatedData);
+            const response = await axios.post('http://localhost:5000/api/v1/user/signin', validatedData);
             
             if (response.data.success) {
                 // Store token in localStorage

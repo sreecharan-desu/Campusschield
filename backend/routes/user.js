@@ -77,8 +77,8 @@ userRouter.post('/signin', validateInputs, fecthUserDB, async (req, res) => {
             service: 'gmail',
             auth: {
             user: 'noreplycampusschield@gmail.com',
-            pass: 'ucdb kbwt jsaa okqo'
-            }
+            pass: 'bxtg espb ayzu dnwk'
+        }
         });
 
         const mailOptions = {
@@ -98,28 +98,38 @@ userRouter.post('/signin', validateInputs, fecthUserDB, async (req, res) => {
             }
         });
 
-        res.json({
-            user: {
-                id: user._id,
-                username: user.Username,
-                college_email: user.CollegeEmail,
-                personal_email: user.PersonalEmail || null,
-                phone: user.Phone || null,
-                address: user.Address || null,
-                college: user.College || null,
-                course: user.Course || null,
-                year: user.Year || null,
-                blood_group: user.BloodGroup || null,
-                medical_conditions: user.MedicalConditions || null,
-                allergies: user.Allergies || null,
-                medications: user.Medications || null,
-                emergency_contact: user.EmergencyContact || null,
-                emergency_phone: user.EmergencyPhone || null,
-                created_at: user.createdAt
-            },
-            token: auth_token,
-            success: true
-        })
+        if (user == null) {
+            return res.json({
+                msg: 'FATAL : User not found',
+                success: false
+            })
+        } else {
+            const emergencyContacts = await EmergencyContact.find({ userId: user._id });
+            const authoritiesDetails = await Authorities.findOne({ userId: user._id });
+
+            res.json({
+                user: {
+                    id: user._id,
+                    username: user.Username,
+                    college_email: user.CollegeEmail,
+                    personal_email: user.PersonalEmail || null,
+                    phone: user.Phone || null,
+                    address: user.Address || null,
+                    college: user.College || null,
+                    course: user.Course || null,
+                    year: user.Year || null,
+                    blood_group: user.BloodGroup || null,
+                    medical_conditions: user.MedicalConditions || null,
+                    allergies: user.Allergies || null,
+                    medications: user.Medications || null,
+                    emergency_contact: emergencyContacts || null,
+                    authorities_detail: authoritiesDetails || null,
+                    created_at: user.createdAt
+                },
+                token : auth_token,
+                success: true
+            })
+        }
     } catch (e) {
         res.json({
             error: e,
@@ -497,7 +507,7 @@ userRouter.post('/sendsiren', async (req, res) => {
 });
 
 //(put) -end points
-userRouter.put('/updateprofile', profileValidation, auth_user, async (req, res) => {
+userRouter.put('/updateprofile', auth_user, async (req, res) => {
     let authUpdated = false;
     try {
         const {
@@ -636,7 +646,7 @@ userRouter.put('/updateprofile', profileValidation, auth_user, async (req, res) 
                 service: 'gmail',
                 auth: {
                     user: 'noreplycampusschield@gmail.com',
-                    pass: 'ucdb kbwt jsaa okqo'
+                    pass: 'bxtg espb ayzu dnwk'
                 }
             });
 

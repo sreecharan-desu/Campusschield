@@ -127,8 +127,7 @@ adminRouter.put('/changestatus', auth_admin, async (req, res) => {
             service: 'gmail',
             auth: {
             user: 'noreplycampusschield@gmail.com',
-            pass: 'ucdb kbwt jsaa okqo'
-            }
+pass: 'bxtg espb ayzu dnwk'            }
         });
 
         await transporter.sendMail({
@@ -190,8 +189,7 @@ adminRouter.delete('/deletereport', auth_admin, async (req, res) => {
             service: 'gmail',
             auth: {
             user: 'noreplycampusschield@gmail.com',
-            pass: 'ucdb kbwt jsaa okqo'
-            }
+pass: 'bxtg espb ayzu dnwk'            }
         });
 
         const mailOptions = {

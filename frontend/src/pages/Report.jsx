@@ -205,8 +205,9 @@ const Report = () => {
                                     value={formData.location}
                                     onChange={handleInputChange}
                                     className="flex-1 p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                    placeholder="Enter or auto-detect location"
+                                    placeholder="Auto-detect location"
                                     required
+                                    readOnly
                                 />
                                 <button
                                     type="button"

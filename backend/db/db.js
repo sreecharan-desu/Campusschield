@@ -57,11 +57,6 @@ const userSchema = new mongoose.Schema({
         type: String, 
         default : null
     },
-    EmergencyContact: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'EmergencyContact', 
-        default : null
-    },
     createdAt: {
         type: Date,
         default: Date.now

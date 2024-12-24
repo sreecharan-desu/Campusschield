@@ -1,342 +1,645 @@
-import React, { useEffect, useState } from 'react';
-import { Navigate, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { 
+    Edit2, Save, X, User, Phone, Mail, Book, Heart, Building,
+    UserPlus, AlertCircle, Award, Calendar, MapPin, Shield,
+    PhoneIcon,
+    LogOutIcon
+} from 'lucide-react';
 import BottomNavbar from '../components/BottomNavbar';
 
-const Profile = () => {
+const MobileDashboard = () => {
     const [userData, setUserData] = useState(null);
+    const [reports, setReports] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [isEditing, setIsEditing] = useState(false);
+    const [editedData, setEditedData] = useState({});
+    const [updateStatus, setUpdateStatus] = useState({ type: '', message: '' });
+    const navigate = useNavigate();
+
+    const initializeEditData = (user) => ({
+      username: user.username || '',
+      password: '',
+      personal_email: user.personal_email || '',
+      college_email: user.college_email || '',
+      phone: user.phone || '',
+      address: user.address || '',
+      college_name: user.college || '',
+      course: user.course || '',
+      year: user.year || '',
+      blood_group: user.blood_group || '',
+      medical_conditions: user.medical_conditions || '',
+      allergies: user.allergies || '',
+      medications: user.medications || '',
+      emergency_contacts: user.emergency_contact || [{
+          name: '',
+          phone: '',
+          relation: ''
+      }],
+      authorities_detail: user.authorities_detail || {
+          name: '',
+          phone: '',
+          address: '',
+          email: '',
+          type: ''
+      }
+  });
+    // Fetch Reports
+    const fetchReports = async (username, token) => {
+        try {
+            const response = await fetch(
+                'http://localhost:5000/api/v1/user/getreports',
+                {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: `Bearer ${token}`,
+                    },
+                    body: JSON.stringify({ username }),
+                }
+            );
+
+            if (response.ok) {
+                const data = await response.json();
+                setReports(data.reports || []);
+            }
+        } catch (error) {
+            console.error('Error fetching reports:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // Profile Update Handler
+    const handleUpdateProfile = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            
+            // Clean up data before sending
+            const cleanedData = {
+                ...editedData,
+                emergency_contacts: editedData.emergency_contacts.filter(
+                    contact => contact.name || contact.phone || contact.relation
+                )
+            };
+
+            if (!cleanedData.password) {
+                delete cleanedData.password;
+            }
+
+            const response = await fetch(
+                'http://localhost:5000/api/v1/user/updateprofile',
+                {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: `Bearer ${token}`,
+                    },
+                    body: JSON.stringify(cleanedData),
+                }
+            );
+
+            const data = await response.json();
+
+            if (data.success) {
+                setUpdateStatus({ type: 'success', message: data.msg });
+                                setTimeout(()=>{
+                  setUpdateStatus({ type: '', message: '' })
+                },2000)
+                if (data.user) {
+                    setUserData(data.user);
+                    localStorage.setItem('user', JSON.stringify(data.user));
+                }
+                setIsEditing(false);
+                
+                if (data.msg.includes('signin again')) {
+                    setTimeout(() => handleLogout(), 2000);
+                }
+            } else {
+                setUpdateStatus({ type: 'error', message: data.msg });
+                setTimeout(()=>{
+                  setUpdateStatus({ type: '', message: '' })
+                },2000)
+            }
+        } catch (error) {
+            setUpdateStatus({ type: 'error', message: 'Failed to update profile' });
+            setTimeout(()=>{
+              setUpdateStatus({ type: '', message: '' })
+            },2000)
+        }
+    };
+
+  
+
+    // Emergency Contact Handlers
+    const handleAddEmergencyContact = () => {
+        setEditedData({
+            ...editedData,
+            emergency_contacts: [
+                ...editedData.emergency_contacts,
+                { name: '', phone: '', relation: '' }
+            ]
+        });
+    };
+
+    const handleEmergencyContactChange = (index, field, value) => {
+        const newContacts = editedData.emergency_contacts.map((contact, i) => 
+            i === index ? { ...contact, [field]: value } : contact
+        );
+        setEditedData({ ...editedData, emergency_contacts: newContacts });
+    };
+
+    const handleRemoveEmergencyContact = (index) => {
+        setEditedData({
+            ...editedData,
+            emergency_contacts: editedData.emergency_contacts.filter((_, i) => i !== index)
+        });
+    };
+
+    // Authentication Handlers
+    const handleLogout = () => {
+        localStorage.clear();
+        navigate('/signin');
+    };
 
     useEffect(() => {
+        const user = JSON.parse(localStorage.getItem('user'));
         const token = localStorage.getItem('token');
-        if (token) {
-            // Fetch user data from local storage if available
-            const user = JSON.parse(localStorage.getItem('user'));
-            fetch('https://campus-schield-backend-api.vercel.app/api/v1/user/details', {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            })
-            .then(res => res.json())
-            .then(data => {
-                if (data.success) {
-                    localStorage.setItem('user', JSON.stringify(data.user));
-                    setUserData(data.user);
-                }
-            })
-            .catch(err => console.error('Error fetching user details:', err));
+
+        if (user && token) {
             setUserData(user);
-            setLoading(false);
+            setEditedData(initializeEditData(user));
+            fetchReports(user.username, token);
         } else {
             setLoading(false);
         }
     }, []);
 
-    if (loading) {
-        return <div>Loading...</div>;
-    }
+    const computeStats = () => ({
+        totalReports: reports.length,
+        pendingReports: reports.filter((r) => r.Status === 'Pending').length,
+        resolvedReports: reports.filter((r) => r.Status === 'Resolved').length,
+    });
 
-    // If not authenticated, show signin message
-    if (!userData) {
-        return (<>
-            <div className="min-h-screen flex items-center justify-center bg-gray-50">
-                <div className="text-center p-8 bg-white rounded-xl shadow-lg transform transition-all hover:scale-105">
-                    <h2 className="text-3xl font-bold text-indigo-600 mb-4">
-                        Please Sign In
-                    </h2>
-                    <p className="text-gray-600 mb-6">
-                        Sign in to explore your profile and access all features
-                    </p>
-                    <a
-                        href="/signin"
-                        className="inline-block px-6 py-3 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition-colors duration-300 ease-in-out"
-                    >
-                        Sign In Now
-                    </a>
-                </div>
-            </div>
-            <BottomNavbar />
-        </>);
-    }
-    return (
-        <div className="container mx-auto p-4 mb-20">
-          {/* Background Banner */}
-          <div className="relative h-48 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-xl shadow-lg mb-6">
-            <div className="absolute inset-0 flex flex-col items-center justify-center space-y-2">
-              {/* Profile Icon with First Letter */}
-              <div className="bg-white rounded-full w-24 h-24 flex items-center justify-center text-3xl font-semibold text-blue-600">
-                {userData.username[0].toUpperCase()}
-              </div>
-              {/* Full Username */}
-              <div className="text-2xl font-semibold text-white">{userData.username}</div>
-            </div>
-          </div>
-      
-          {/* Profile Header */}
-          <h1 className="text-3xl font-extrabold text-gray-800 text-center mb-6">Profile Information</h1>
-      
-          {/* Profile Content */}
-          <div className="bg-white shadow-lg rounded-xl p-6 space-y-6">
-      
-            {/* Basic Info Section */}
-            <div className="space-y-4">
-              <h2 className="text-xl font-semibold text-gray-800">Basic Info</h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                {/* Username */}
-                <div className="flex items-center space-x-2">
-                  <div className="bg-indigo-100 text-indigo-800 p-2 rounded-full">
-                    <i className="fas fa-user"></i>
-                  </div>
-                  <div>
-                    <h3 className="text-sm font-medium text-gray-600">Username:</h3>
-                    <p className="text-gray-600 text-sm">{userData.username}</p>
-                  </div>
-                </div>
-      
-                {/* College Email */}
-                <div className="flex items-center space-x-2">
-                  <div className="bg-indigo-100 text-indigo-800 p-2 rounded-full">
-                    <i className="fas fa-envelope"></i>
-                  </div>
-                  <div>
-                    <h3 className="text-sm font-medium text-gray-600">College Email:</h3>
-                    <p className="text-gray-600 text-sm">{userData.college_email}</p>
-                  </div>
-                </div>
-      
-                {/* Personal Email */}
-                <div className="flex items-center space-x-2">
-                  <div className="bg-indigo-100 text-indigo-800 p-2 rounded-full">
-                    <i className="fas fa-envelope-open-text"></i>
-                  </div>
-                  <div>
-                    <h3 className="text-sm font-medium text-gray-600">Personal Email:</h3>
-                    <p className="text-gray-600 text-sm">{userData.personal_email || 'Not provided'}</p>
-                  </div>
-                </div>
-      
-                {/* Phone */}
-                <div className="flex items-center space-x-2">
-                  <div className="bg-indigo-100 text-indigo-800 p-2 rounded-full">
-                    <i className="fas fa-phone-alt"></i>
-                  </div>
-                  <div>
-                    <h3 className="text-sm font-medium text-gray-600">Phone:</h3>
-                    <p className="text-gray-600 text-sm">{userData.phone || 'Not provided'}</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-      
-            {/* Education Info Section */}
-            <div className="space-y-4">
-              <h2 className="text-xl font-semibold text-gray-800">Education Info</h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                {/* Address */}
-                <div className="flex items-center space-x-2">
-                  <div className="bg-indigo-100 text-indigo-800 p-2 rounded-full">
-                    <i className="fas fa-home"></i>
-                  </div>
-                  <div>
-                    <h3 className="text-sm font-medium text-gray-600">Address:</h3>
-                    <p className="text-gray-600 text-sm">{userData.address || 'Not provided'}</p>
-                  </div>
-                </div>
-      
-                {/* College */}
-                <div className="flex items-center space-x-2">
-                  <div className="bg-indigo-100 text-indigo-800 p-2 rounded-full">
-                    <i className="fas fa-university"></i>
-                  </div>
-                  <div>
-                    <h3 className="text-sm font-medium text-gray-600">College:</h3>
-                    <p className="text-gray-600 text-sm">{userData.college || 'Not provided'}</p>
-                  </div>
-                </div>
-      
-                {/* Course */}
-                <div className="flex items-center space-x-2">
-                  <div className="bg-indigo-100 text-indigo-800 p-2 rounded-full">
-                    <i className="fas fa-book-open"></i>
-                  </div>
-                  <div>
-                    <h3 className="text-sm font-medium text-gray-600">Course:</h3>
-                    <p className="text-gray-600 text-sm">{userData.course || 'Not provided'}</p>
-                  </div>
-                </div>
-      
-                {/* Year */}
-                <div className="flex items-center space-x-2">
-                  <div className="bg-indigo-100 text-indigo-800 p-2 rounded-full">
-                    <i className="fas fa-calendar-alt"></i>
-                  </div>
-                  <div>
-                    <h3 className="text-sm font-medium text-gray-600">Year:</h3>
-                    <p className="text-gray-600 text-sm">{userData.year || 'Not provided'}</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-      
-            {/* Medical Info Section */}
-            <div className="space-y-4">
-              <h2 className="text-xl font-semibold text-gray-800">Medical Info</h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                {/* Blood Group */}
-                <div className="flex items-center space-x-2">
-                  <div className="bg-indigo-100 text-indigo-800 p-2 rounded-full">
-                    <i className="fas fa-tint"></i>
-                  </div>
-                  <div>
-                    <h3 className="text-sm font-medium text-gray-600">Blood Group:</h3>
-                    <p className="text-gray-600 text-sm">{userData.blood_group || 'Not provided'}</p>
-                  </div>
-                </div>
-      
-                {/* Medical Conditions */}
-                <div className="flex items-center space-x-2">
-                  <div className="bg-indigo-100 text-indigo-800 p-2 rounded-full">
-                    <i className="fas fa-heartbeat"></i>
-                  </div>
-                  <div>
-                    <h3 className="text-sm font-medium text-gray-600">Medical Conditions:</h3>
-                    <p className="text-gray-600 text-sm">{userData.medical_conditions || 'None'}</p>
-                  </div>
-                </div>
-      
-                {/* Allergies */}
-                <div className="flex items-center space-x-2">
-                  <div className="bg-indigo-100 text-indigo-800 p-2 rounded-full">
-                    <i className="fas fa-allergies"></i>
-                  </div>
-                  <div>
-                    <h3 className="text-sm font-medium text-gray-600">Allergies:</h3>
-                    <p className="text-gray-600 text-sm">{userData.allergies || 'None'}</p>
-                  </div>
-                </div>
-      
-                {/* Medications */}
-                <div className="flex items-center space-x-2">
-                  <div className="bg-indigo-100 text-indigo-800 p-2 rounded-full">
-                    <i className="fas fa-pills"></i>
-                  </div>
-                  <div>
-                    <h3 className="text-sm font-medium text-gray-600">Medications:</h3>
-                    <p className="text-gray-600 text-sm">{userData.medications || 'None'}</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-      
-            {/* Emergency Info Section */}
-            <div className="space-y-4">
-              <h2 className="text-xl font-semibold text-gray-800">Emergency Info</h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                {/* Emergency Contact */}
-                <div className="flex items-center space-x-2">
-                  <div className="bg-indigo-100 text-indigo-800 p-2 rounded-full">
-                    <i className="fas fa-user-shield"></i>
-                  </div>
-                  <div>
-                    <h3 className="text-sm font-medium text-gray-600">Emergency Contact:</h3>
-                    <p className="text-gray-600 text-sm">{userData.emergency_contact || 'Not provided'}</p>
-                  </div>
-                </div>
-      
-                {/* Emergency Phone */}
-                <div className="flex items-center space-x-2">
-                  <div className="bg-indigo-100 text-indigo-800 p-2 rounded-full">
-                    <i className="fas fa-phone-volume"></i>
-                  </div>
-                  <div>
-                    <h3 className="text-sm font-medium text-gray-600">Emergency Phone:</h3>
-                    <p className="text-gray-600 text-sm">{userData.emergency_phone || 'Not provided'}</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        
-            
-
-
-          {/* Bottom Navbar */}
-          <BottomNavbar />
-        </div>
-      );
-      
-      
-};
-
-export default Profile;
-
-
-const UpdateProfile = ({ userData, setShowUpdate, refreshData }) => {
-    const [formData, setFormData] = useState({ ...userData });
-
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        const token = localStorage.getItem('token');
-        try {
-            const response = await fetch('https://campus-schield-backend-api.vercel.app/api/v1/user/updateprofile', {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify(formData)
-            });
-            const data = await response.json();
-            if (data.success) {
-                if (data.msg.includes('signin again')) {
-                    handleLogout();
-                } else {
-                    localStorage.setItem('user', JSON.stringify(data.user));
-                    setShowUpdate(false);
-                    refreshData();
-                }
-            }
-        } catch (err) {
-            console.error('Error updating profile:', err);
-        }
-    };
-
-    const handleChange = (e) => {
-        setFormData({ ...formData, [e.target.name]: e.target.value });
-    };
-
-    return (
-        <form onSubmit={handleSubmit} className="space-y-4 p-6 bg-white rounded-lg shadow">
-            {Object.keys(userData).map(key => 
-                key !== 'college_email' && (
-                    <div key={key} className="flex flex-col">
-                        <label className="text-sm font-medium text-gray-700 capitalize">
-                            {key.replace(/_/g, ' ')}
-                        </label>
-                        <input
-                            type="text"
-                            name={key}
-                            value={formData[key] || ''}
-                            onChange={handleChange}
-                            className="mt-1 p-2 border rounded-md"
-                        />
+    // UI Components
+    const renderProfileSection = () => (
+        <div className="bg-gradient-to-r from-purple-500 to-indigo-500 text-white p-6 rounded-b-3xl shadow-lg">
+            <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-4">
+                    <div className="-mt-14 w-16 h-16 rounded-full bg-white text-indigo-500 flex items-center justify-center font-bold text-2xl shadow-md">
+                        {userData.username?.charAt(0).toUpperCase()}
                     </div>
-                )
+                    <div>
+                        <h2 className="text-2xl font-bold">{userData.username}</h2>
+                        <p className="text-sm opacity-90">{userData.college_email}</p>
+                        <p className="text-xs opacity-75">{userData.college}</p>
+                        <button
+    onClick={handleLogout}
+    className="px-1 py-2 mt-4 bg-red-500 text-white rounded-lg shadow-md hover:bg-red-600 hover:shadow-lg focus:ring-2 focus:ring-red-300 transition duration-300 flex items-center gap-2"
+>
+    <LogOutIcon className="w-5 h-5" />
+    <span>Logout</span>
+</button>
+                    </div>
+                 
+
+                </div>
+                <div className="flex gap-2">
+                    {!isEditing ? (
+                        <button
+                            onClick={() => setIsEditing(true)}
+                            className="bg-white text-indigo-500 p-2 rounded-full hover:bg-indigo-50 transition-colors"
+                        >
+                            <Edit2 size={20} />
+                        </button>
+                    ) : (
+                        <div className="flex gap-2">
+                            <button
+                                onClick={handleUpdateProfile}
+                                className="bg-green-500 text-white p-2 rounded-full hover:bg-green-600 transition-colors"
+                            >
+                                <Save size={20} />
+                            </button>
+                            <button
+                                onClick={() => {
+                                    setIsEditing(false);
+                                    setEditedData(initializeEditData(userData));
+                                }}
+                                className="bg-red-500 text-white p-2 rounded-full hover:bg-red-600 transition-colors"
+                            >
+                                <X size={20} />
+                            </button>
+                        </div>
+                    )}
+                </div>
+            </div>
+        </div>
+    );
+
+    const renderSection = (title, icon, fields, color) => (
+        <div className="bg-white rounded-xl shadow-sm p-4 hover:shadow-md transition-shadow">
+            <div className="flex items-center gap-2 mb-4">
+                <div className={`p-2 rounded-lg ${color}`}>
+                    {icon}
+                </div>
+                <h3 className="text-lg font-semibold">{title}</h3>
+            </div>
+            <div className="space-y-3">
+                {fields.map((field) => (
+                    <div key={field.key} className="flex flex-col">
+                        <label className="text-sm text-gray-500 mb-1">
+                            {field.label}
+                        </label>
+                        {isEditing ? (
+                            <input
+                                type={field.type}
+                                value={editedData[field.key] || ''}
+                                onChange={(e) => setEditedData({
+                                    ...editedData,
+                                    [field.key]: e.target.value
+                                })}
+                                className="p-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 transition-all"
+                                placeholder={`Enter ${field.label.toLowerCase()}`}
+                            />
+                        ) : (
+                            <p className="text-gray-800 p-2 bg-gray-50 rounded-lg">
+                                {userData[field.key] || 'Not specified'}
+                            </p>
+                        )}
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
+
+    const renderEmergencyContacts = () => (
+        <div className="bg-white rounded-xl shadow-sm p-4 hover:shadow-md transition-shadow">
+            <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2">
+                    <div className="p-2 rounded-lg bg-purple-100">
+                        <UserPlus className="text-purple-500" />
+                    </div>
+                    <h3 className="text-lg font-semibold">Emergency Contacts</h3>
+                </div>
+                {isEditing && (
+                    <button
+                        onClick={handleAddEmergencyContact}
+                        className="text-purple-500 hover:text-purple-700 font-medium"
+                    >
+                        Add Contact
+                    </button>
+                )}
+            </div>
+            <div className="space-y-4">
+                {editedData.emergency_contacts.map((contact, index) => (
+                    <div key={index} className="p-4 border rounded-lg space-y-2 bg-gray-50">
+                        {isEditing ? (
+                            <>
+                                <div className="flex justify-between items-center mb-2">
+                                    <span className="text-sm font-medium text-purple-500">
+                                        Contact {index + 1}
+                                    </span>
+                                    <button
+                                        onClick={() => handleRemoveEmergencyContact(index)}
+                                        className="text-red-500 hover:text-red-700"
+                                    >
+                                        <X size={16} />
+                                    </button>
+                                </div>
+                                <input
+                                    type="text"
+                                    placeholder="Name"
+                                    value={contact.Name}
+                                    onChange={(e) => handleEmergencyContactChange(index, 'name', e.target.value)}
+                                    className="w-full p-2 border rounded mb-2"
+                                />
+                                <input
+                                    type="tel"
+                                    placeholder="Phone"
+                                    value={contact.Phone}
+                                    onChange={(e) => handleEmergencyContactChange(index, 'phone', e.target.value)}
+                                    className="w-full p-2 border rounded mb-2"
+                                />
+                                <input
+                                    type="text"
+                                    placeholder="Relationship"
+                                    value={contact.Relationship}
+                                    onChange={(e) => handleEmergencyContactChange(index, 'relation', e.target.value)}
+                                    className="w-full p-2 border rounded"
+                                />
+                            </>
+                        ) : (
+                          <>
+                          <div className="p-4 border rounded-lg bg-gray-50 shadow-sm hover:shadow-md transition-shadow">
+                              <div className="text-sm text-purple-500 font-semibold mb-2">
+                                  ID: {contact._id}
+                              </div>
+                              <div className="font-bold text-lg text-gray-800 mb-1">
+                                  {contact.Name || 'Not specified'}
+                              </div>
+                              <div className="flex items-center gap-3 text-sm text-gray-600 mb-2">
+                                  {contact.Phone ? (
+                                      <>
+                                          <a
+                                              href={`tel:${contact.Phone}`}
+                                              className="flex items-center justify-center bg-green-500 text-white rounded-full w-10 h-10 shadow-md hover:bg-green-600 transition"
+                                          >
+                                              <PhoneIcon className="h-5 w-5" />
+                                          </a>
+                                          <span>{contact.Phone}</span>
+                                      </>
+                                  ) : (
+                                      'No phone'
+                                  )}
+                              </div>
+                              <div className="text-sm text-purple-500">
+                                  Relationship: {contact.Relationship || 'No relation specified'}
+                              </div>
+                          </div>
+                      </>
+                      
+                        )}
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
+
+    const renderAuthoritiesDetails = () => (
+      <div className="bg-white rounded-xl shadow-sm p-4 hover:shadow-md transition-shadow">
+          <div className="flex items-center gap-2 mb-4">
+              <div className="p-2 rounded-lg bg-orange-100">
+                  <Shield className="text-orange-500" />
+              </div>
+              <h3 className="text-lg font-semibold">Authority Details</h3>
+          </div>
+          <div className="space-y-3">
+              {isEditing ? (
+                  <>
+                      <input
+                          type="text"
+                          placeholder="Authority Name"
+                          value={editedData.authorities_detail.Name}
+                          onChange={(e) => setEditedData({
+                              ...editedData,
+                              authorities_detail: {
+                                  ...editedData.authorities_detail,
+                                  name: e.target.value
+                              }
+                          })}
+                          className="w-full p-2 border rounded mb-2"
+                      />
+                      <input
+                          type="tel"
+                          placeholder="Authority Phone"
+                          value={editedData.authorities_detail.Phone}
+                          onChange={(e) => setEditedData({
+                              ...editedData,
+                              authorities_detail: {
+                                  ...editedData.authorities_detail,
+                                  phone: e.target.value
+                              }
+                          })}
+                          className="w-full p-2 border rounded mb-2"
+                      />
+                      <input
+                          type="text"
+                          placeholder="Authority Address"
+                          value={editedData.authorities_detail.Address}
+                          onChange={(e) => setEditedData({
+                              ...editedData,
+                              authorities_detail: {
+                                  ...editedData.authorities_detail,
+                                  address: e.target.value
+                              }
+                          })}
+                          className="w-full p-2 border rounded mb-2"
+                      />
+                      <input
+                          type="email"
+                          placeholder="Authority Email"
+                          value={editedData.authorities_detail.Email}
+                          onChange={(e) => setEditedData({
+                              ...editedData,
+                              authorities_detail: {
+                                  ...editedData.authorities_detail,
+                                  email: e.target.value
+                              }
+                          })}
+                          className="w-full p-2 border rounded mb-2"
+                      />
+                      <select
+                          value={editedData.authorities_detail.Type}
+                          onChange={(e) => setEditedData({
+                              ...editedData,
+                              authorities_detail: {
+                                  ...editedData.authorities_detail,
+                                  type: e.target.value
+                              }
+                          })}
+                          className="w-full p-2 border rounded"
+                      >
+                          <option value="">Select Authority Type</option>
+                          <option value="Police">Police</option>
+                          <option value="Campus Security">Campus Security</option>
+                          <option value="Medical">Medical</option>
+                          <option value="Other">Other</option>
+                      </select>
+                  </>
+              ) : (
+                  <div className="space-y-2">
+                      <p className="font-medium">
+                          {userData.authorities_detail?.Name || 'Not specified'}
+                      </p>
+                      <>
+    <div className="p-4 border rounded-lg bg-gray-50 shadow-sm hover:shadow-md transition-shadow">
+        <div className="flex items-center gap-3 text-sm text-gray-600 mb-2">
+            {userData.authorities_detail?.Phone ? (
+                <>
+                    <a
+                        href={`tel:${userData.authorities_detail?.Phone}`}
+                        className="flex items-center justify-center bg-green-500 text-white rounded-full w-10 h-10 shadow-md hover:bg-green-600 transition"
+                    >
+                        <PhoneIcon className="h-5 w-5" />
+                    </a>
+                    <span>{userData.authorities_detail?.Phone}</span>
+                </>
+            ) : (
+                'No phone'
             )}
-            <div className="flex justify-end space-x-4">
+        </div>
+    </div>
+</>
+
+                      <p className="text-sm text-gray-600">
+                          {userData.authorities_detail?.Email || 'No email'}
+                      </p>
+                      <p className="text-sm text-gray-600">
+                          {userData.authorities_detail?.Address || 'No address'}
+                      </p>
+                      <p className="text-sm text-orange-500">
+                          {userData.authorities_detail?.Type || 'No type specified'}
+                      </p>
+                  </div>
+              )}
+          </div>
+      </div>
+  );
+  
+
+    if (loading) {
+        return (
+            <div className="min-h-screen bg-gray-50 animate-pulse">
+                <div className="bg-gradient-to-r from-purple-500 to-indigo-500 p-6 rounded-b-3xl">
+                    <div className="flex items-center gap-4">
+                        <div className="w-16 h-16 bg-gray-300 rounded-full"></div>
+                        <div className="space-y-2">
+                            <div className="w-32 h-6 bg-gray-300 rounded"></div>
+                            <div className="w-48 h-4 bg-gray-300 rounded"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    if (!userData) {
+        return (
+            <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-6">
+                <div className="text-center mb-8 space-y-4">
+                    <div className="w-24 h-24 bg-indigo-500 rounded-full mx-auto flex items-center justify-center">
+                        <Shield className="w-12 h-12 text-white" />
+                    </div>
+                    <h1 className="text-3xl font-bold text-indigo-600">Welcome to Campus Shield</h1>
+                    <p className="text-lg text-gray-600">
+                        Secure your campus. Report incidents. Stay safe.
+                    </p>
+                </div>
                 <button
-                    type="button"
-                    onClick={() => setShowUpdate(false)}
-                    className="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600"
+                    onClick={() => navigate('/signin')}
+                    className="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-3 rounded-lg text-lg font-semibold shadow-lg hover:shadow-xl transition-all"
                 >
-                    Cancel
-                </button>
-                <button
-                    type="submit"
-                    className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
-                >
-                    Save Changes
+                    Sign In to Explore
                 </button>
             </div>
-        </form>
+        );
+    }
+
+    const { totalReports, pendingReports, resolvedReports } = computeStats();
+
+    return (
+      <div className="min-h-screen bg-gray-50 pb-20">
+            {/* Status Message */}
+            {updateStatus.message && (
+                <div className={`fixed top-0 left-0 right-0 p-4 text-center text-white z-50 ${
+                    updateStatus.type === 'success' ? 'bg-green-500' : 'bg-red-500'
+                }`}>
+                    {updateStatus.message}
+                </div>
+            )}
+
+            {/* Profile Section */}
+            {renderProfileSection()}
+
+            {/* Stats Section */}
+            <div className="p-4">
+                <h3 className="text-lg font-semibold mb-4">Report Statistics</h3>
+                <div className="grid grid-cols-3 gap-4">
+                    <StatCard
+                        icon="📊"
+                        label="Total Reports"
+                        value={totalReports}
+                        bg="bg-indigo-100"
+                        textColor="text-indigo-600"
+                    />
+                    <StatCard
+                        icon="⏳"
+                        label="Pending Reports"
+                        value={pendingReports}
+                        bg="bg-yellow-100"
+                        textColor="text-yellow-600"
+                    />
+                    <StatCard
+                        icon="✅"
+                        label="Resolved Reports"
+                        value={resolvedReports}
+                        bg="bg-green-100"
+                        textColor="text-green-600"
+                    />
+                </div>
+            </div>
+
+            {/* Editable Sections */}
+            <div className="p-4 space-y-6">
+                {renderSection(
+                    'Personal Details',
+                    <User size={20} className="text-indigo-500" />,
+                    [
+                        { label: 'Username', key: 'username', type: 'text' },
+                        { label: 'Personal Email', key: 'personal_email', type: 'email' },
+                        { label: 'College Email', key: 'college_email', type: 'email' },
+                        { label: 'Phone', key: 'phone', type: 'tel' },
+                        { label: 'Address', key: 'address', type: 'text' },
+                    ],
+                    'bg-indigo-100'
+                )}
+                {renderSection(
+                    'College Information',
+                    <Building size={20} className="text-blue-500" />,
+                    [
+                        { label: 'College Name', key: 'college_name', type: 'text' },
+                        { label: 'Course', key: 'course', type: 'text' },
+                        { label: 'Year', key: 'year', type: 'text' },
+                    ],
+                    'bg-blue-100'
+                )}
+                {renderSection(
+                    'Medical Information',
+                    <Heart size={20} className="text-red-500" />,
+                    [
+                        { label: 'Blood Group', key: 'blood_group', type: 'text' },
+                        { label: 'Medical Conditions', key: 'medical_conditions', type: 'text' },
+                        { label: 'Allergies', key: 'allergies', type: 'text' },
+                        { label: 'Medications', key: 'medications', type: 'text' },
+                    ],
+                    'bg-red-100'
+                )}
+
+
+{renderSection(
+                'Personal Details',
+                <User size={20} className="text-indigo-500" />,
+                [
+                    { label: 'Username', key: 'username', type: 'text' },
+                    { label: 'Password', key: 'password', type: 'password' },
+                    { label: 'Personal Email', key: 'personal_email', type: 'email' },
+                    { label: 'College Email', key: 'college_email', type: 'email' },
+                    { label: 'Phone', key: 'phone', type: 'tel' },
+                    { label: 'Address', key: 'address', type: 'text' },
+                ],
+                'bg-indigo-100'
+            )}
+
+                {renderEmergencyContacts()}
+                {renderAuthoritiesDetails()}
+
+            </div>
+
+            {/* Bottom Navigation */}
+            <BottomNavbar />
+        </div>
     );
 };
+
+// StatCard Component
+const StatCard = ({ icon, label, value, bg, textColor }) => (
+    <div className={`p-4 rounded-lg shadow-sm ${bg}  text-center`}>
+        <div className="flex items-center justify-center">
+            {/* <span className={`text-xl font-bold ${textColor}`}>{icon}</span> */}
+            <span className="text-2xl font-semibold text-center">{value}</span>
+        </div>
+        <p className={`text-sm mt-2 font-medium ${textColor}`}>{label}</p>
+    </div>
+);
+
+export default MobileDashboard;

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import BottomNavbar from '../components/BottomNavbar';
@@ -8,6 +8,38 @@ import { motion, AnimatePresence } from "framer-motion";
 const SirenButton = () => {
   const [showPopup, setShowPopup] = useState(false);
   const [dispersing, setDispersing] = useState(false);
+  const [sirenActive, setSirenActive] = useState(false);
+  const sirenAudioRef = useRef(null);
+  const fadeOutIntervalRef = useRef(null);
+
+  const playSirenSound = () => {
+    if (!sirenAudioRef.current) {
+      sirenAudioRef.current = new Audio("/siren.mp3");
+      sirenAudioRef.current.loop = true; // Loop the siren sound
+    }
+    sirenAudioRef.current.volume = 1; // Set volume to maximum
+    sirenAudioRef.current.play().catch((error) => {
+      console.error("Error playing siren sound:", error);
+    });
+    setSirenActive(true);
+  };
+
+  const stopSirenSoundWithFadeOut = () => {
+    if (sirenAudioRef.current) {
+      let volume = sirenAudioRef.current.volume;
+      fadeOutIntervalRef.current = setInterval(() => {
+        if (volume > 0.1) {
+          volume -= 0.1; // Decrease volume gradually
+          sirenAudioRef.current.volume = Math.max(volume, 0);
+        } else {
+          clearInterval(fadeOutIntervalRef.current);
+          sirenAudioRef.current.pause();
+          sirenAudioRef.current.currentTime = 0; // Reset playback position
+          setSirenActive(false);
+        }
+      }, 100); // Decrease volume every 100ms
+    }
+  };
 
   const handleSiren = async () => {
     try {
@@ -17,8 +49,7 @@ const SirenButton = () => {
 
       const token = localStorage.getItem("token");
       const response = await fetch(
-        "http://localhost:5000/api/v1/user/sendsiren",
-        {
+        "https://campus-schield-backend-api.vercel.app/api/v1/user/sendsiren",        {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -54,14 +85,53 @@ const SirenButton = () => {
 
   return (
     <>
-<motion.button
-  onClick={() => setShowPopup(true)}
-  className="fixed right-4 ml-10 mb-10 bottom-16 w-16 h-16 rounded-full bg-gradient-to-br from-red-500 to-red-700 flex items-center justify-center shadow-lg hover:scale-105 transition-transform"
-  aria-label="Emergency Alert Button"
->
-  <span className="text-white text-3xl">🚨</span>
-</motion.button>
-
+      <motion.button
+        onClick={() => {
+          if (sirenActive) {
+            stopSirenSoundWithFadeOut();
+          } else {
+            playSirenSound();
+            setShowPopup(true);
+          }
+        }}
+        className={`fixed right-4 bottom-16 w-16 h-16 rounded-full ml-10 mb-10 ${
+          sirenActive ? "bg-red-600" : "bg-gradient-to-br from-red-500 to-red-700"
+        } flex items-center justify-center shadow-lg transition-transform hover:scale-105 focus:ring-4 focus:ring-red-300`}
+        aria-label="Emergency Alert Button"
+      >
+        {sirenActive ? (
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="w-8 h-8 text-white animate-pulse"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M9 18v-6m6 6v-6" />
+            <path d="M12 9v-3" />
+            <path d="M5 12h14" />
+            <path d="M5 12H4a1 1 0 01-1-1V9a3 3 0 013-3h10a3 3 0 013 3v2a1 1 0 01-1 1h-1" />
+          </svg>
+        ) : (
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="w-8 h-8 text-white"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <circle cx="12" cy="12" r="10" />
+            <path d="M12 8v4" />
+            <path d="M12 16h.01" />
+          </svg>
+        )}
+      </motion.button>
 
       <AnimatePresence>
         {showPopup && (
@@ -101,7 +171,10 @@ const SirenButton = () => {
                     Send Alert
                   </button>
                   <button
-                    onClick={() => setShowPopup(false)}
+                    onClick={() => {
+                      setShowPopup(false);
+                      stopSirenSoundWithFadeOut(); // Stop siren if canceled
+                    }}
                     className="w-full py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition"
                   >
                     Cancel
@@ -120,30 +193,29 @@ const SirenButton = () => {
 const Homepage = () => {
   const [isAuth, setIsAuth] = useState(false);
   const [reports, setReports] = useState([]);
-  const [displayedReports, setDisplayedReports] = useState([]);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filterStatus, setFilterStatus] = useState('All');
-  const [userName, setUserName] = useState('');
-  const [greeting, setGreeting] = useState('');
-  const [showAllReports, setShowAllReports] = useState(false);
-  const [loading, setLoading] = useState(true); // Loading state
+  const [filteredReports, setFilteredReports] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filterStatus, setFilterStatus] = useState("All");
+  const [userName, setUserName] = useState("");
+  const [greeting, setGreeting] = useState("");
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
   useEffect(() => {
     const fetchReports = async () => {
-      const token = localStorage.getItem('token');
-      const user = JSON.parse(localStorage.getItem('user'));
+      const token = localStorage.getItem("token");
+      const user = JSON.parse(localStorage.getItem("user"));
 
-      if (!token || !user) return;
+      if (!token || !user) return setLoading(false);
 
       try {
         const response = await fetch(
-          'https://campus-schield-backend-api.vercel.app/api/v1/user/getreports',
+          "https://campus-schield-backend-api.vercel.app/api/v1/user/getreports",
           {
-            method: 'POST',
+            method: "POST",
             headers: {
               Authorization: `Bearer ${token}`,
-              'Content-Type': 'application/json',
+              "Content-Type": "application/json",
             },
             body: JSON.stringify({ username: user.username }),
           }
@@ -152,157 +224,296 @@ const Homepage = () => {
         if (response.ok) {
           const data = await response.json();
           setReports(data.reports);
-          setDisplayedReports(data.reports.slice(0, 2));
+          setFilteredReports(data.reports);
           setIsAuth(true);
           setUserName(user.username);
         }
       } catch (error) {
-        console.error('Error fetching reports:', error);
+        console.error("Error fetching reports:", error);
       } finally {
-        setLoading(false); // Stop loading
+        setLoading(false);
       }
     };
 
     const determineGreeting = () => {
       const currentHour = new Date().getHours();
-      if (currentHour < 12) return 'Good Morning';
-      if (currentHour < 18) return 'Good Afternoon';
-      return 'Good Evening';
+      if (currentHour < 12) return "Good Morning";
+      if (currentHour < 18) return "Good Afternoon";
+      return "Good Evening";
     };
 
     fetchReports();
     setGreeting(determineGreeting());
   }, []);
 
-  const handleViewMore = () => {
-    setDisplayedReports(reports);
-    setShowAllReports(true);
+  const handleSearch = () => {
+    const filtered = reports.filter((report) => {
+      const matchesSearch = report.Title.toLowerCase().includes(
+        searchTerm.toLowerCase()
+      );
+      const matchesStatus =
+        filterStatus === "All" || report.Status === filterStatus;
+      return matchesSearch && matchesStatus;
+    });
+    setFilteredReports(filtered);
   };
 
-  const filteredReports = displayedReports.filter((report) => {
-    return (
-      report.Title.toLowerCase().includes(searchTerm.toLowerCase()) &&
-      (filterStatus === 'All' || report.Status === filterStatus)
-    );
-  });
+  useEffect(() => {
+    handleSearch();
+  }, [searchTerm, filterStatus]);
 
   return (
     <>
-      <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-6 flex items-center justify-between shadow-lg">
-        <div>
+      <div className="relative bg-gradient-to-br from-indigo-500 via-purple-600 to-pink-500 text-white p-6 md:p-8 rounded-lg shadow-lg">
+        {loading ? (
+          <div className="animate-pulse space-y-4">
+            <div className="h-8 w-2/3 bg-gray-300 rounded-lg"></div>
+            <div className="h-6 w-1/2 bg-gray-200 rounded-lg"></div>
+          </div>
+        ) : isAuth ? (
+          <>
+            <button
+              className="absolute top-7 right-4 flex items-center justify-center h-12 w-12 bg-white text-purple-600 font-bold rounded-full shadow-lg transform hover:scale-105 transition-transform"
+              onClick={() => navigate("/profile")}
+              title="View Profile"
+            >
+              {userName.charAt(0).toUpperCase()}
+            </button>
+            <div className="flex items-center gap-4 mb-6">
+              <img
+                src="/vite.svg"
+                alt="Campus Shield Logo"
+                className="h-10 w-10 rounded-full shadow-md"
+              />
+              <h1 className="text-2xl font-bold leading-tight">{`${greeting}, ${userName}!`}</h1>
+            </div>
+            <p className="text-sm md:text-base text-purple-200">
+              Here's your activity overview. Stay updated and safe!
+            </p>
+          </>
+        ) : (
+          <div className="text-center">
+            <h1 className="text-3xl font-bold mb-4">Welcome to Campus Shield</h1>
+            <p className="text-base text-purple-200 mb-6">
+              "Make every day a step closer to a safer and more secure campus. Your journey begins here."
+            </p>
+            <div className="flex justify-center gap-4 mt-6">
+              <button
+                onClick={() => navigate("/signin")}
+                className="px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg shadow-lg transform hover:scale-105 transition-transform"
+              >
+                Sign In
+              </button>
+              <button
+                onClick={() => navigate("/signup")}
+                className="px-6 py-3 bg-green-600 text-white font-semibold rounded-lg shadow-lg transform hover:scale-105 transition-transform"
+              >
+                Sign Up
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {
+        !isAuth ? <>
+
+<div className="flex flex-col items-center justify-center min-h-[80vh] text-center px-4">
+      {/* Hero Section */}
+
+      <p className="text-gray-600 mb-8 mt-8 italic bold">
+        CampusShield is your companion for a secure and informed campus life. 
+        Easily report incidents, stay updated on safety issues, and access 
+        essential resources — all in one place.
+      </p>
+
+      {/* Features Section */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl ">
+        <div className="flex flex-col items-center">
+          <div className="w-24 h-24 mb-4">
+          <svg
+  xmlns="http://www.w3.org/2000/svg"
+  viewBox="0 0 64 64"
+  class="animate-bounce"
+  width="100%"
+  height="100%"
+>
+  <rect x="10" y="5" width="44" height="54" rx="4" fill="#f3f4f6" stroke="#d1d5db" stroke-width="2" />
+  
+  <rect x="16" y="12" width="32" height="4" fill="#6b7280" />
+  
+  <rect x="16" y="20" width="28" height="3" fill="#9ca3af" />
+  <rect x="16" y="26" width="20" height="3" fill="#9ca3af" />
+  <rect x="16" y="32" width="24" height="3" fill="#9ca3af" />
+  
+  <path
+    d="M42 42L54 54L47 61L35 49Z"
+    fill="#f59e0b"
+    stroke="#d97706"
+    stroke-width="2"
+  />
+  <path
+    d="M54 54L57 57"
+    stroke="#9ca3af"
+    stroke-width="2"
+    stroke-linecap="round"
+  />
+  <path
+    d="M35 49L42 42"
+    stroke="#f59e0b"
+    stroke-width="2"
+    stroke-linecap="round"
+  />
+</svg>
+
+          </div>
+          <h3 className="text-lg font-semibold text-indigo-600 mb-2 italic bold">
+            Report Incidents
+          </h3>
+          <p className="text-sm text-gray-600 italic bold">
+            Quickly report incidents and ensure campus safety with ease.
+          </p>
+        </div>
+        <div className="flex flex-col items-center">
+          <div className="w-24 h-24 mb-4">
+          <svg
+  xmlns="http://www.w3.org/2000/svg"
+  viewBox="0 0 64 64"
+  class="animate-pulse"
+  width="100%"
+  height="100%"
+>
+  <path
+    d="M32 8C23.2 8 16 15.2 16 24V38H12C10.8 38 10 38.8 10 40C10 41.2 10.8 42 12 42H20C20 46.4 24.6 50 32 50C39.4 50 44 46.4 44 42H52C53.2 42 54 41.2 54 40C54 38.8 53.2 38 52 38H48V24C48 15.2 40.8 8 32 8Z"
+    fill="#fbbf24"
+    stroke="#f59e0b"
+    stroke-width="2"
+  />
+  
+  <circle cx="32" cy="52" r="4" fill="#f59e0b" />
+  
+  <circle cx="46" cy="18" r="5" fill="#ef4444" />
+  
+  <path
+    d="M24 38H40V24C40 16.8 34.2 12 32 12C29.8 12 24 16.8 24 24V38Z"
+    fill="rgba(255, 255, 255, 0.3)"
+  />
+</svg>
+
+          </div>
+          <h3 className="text-lg font-semibold text-indigo-600 mb-2 italic bold">
+            Real-Time Updates
+          </h3>
+          <p className="text-sm text-gray-600 italic bold">
+            Get real-time updates on campus events and safety alerts.
+          </p>
+        </div>
+        <div className="flex flex-col items-center">
+          <div className="w-24 h-24 mb-4">
+          <svg
+  xmlns="http://www.w3.org/2000/svg"
+  viewBox="0 0 64 64"
+  width="100%"
+  height="100%"
+>
+  <path
+    d="M12 8H44C48.4 8 52 11.6 52 16V48C52 52.4 48.4 56 44 56H12C9.8 56 8 54.2 8 52V12C8 9.8 9.8 8 12 8Z"
+    fill="#60a5fa"
+    stroke="#3b82f6"
+    stroke-width="2"
+  />
+  
+  <path
+    d="M16 12H40V48H16C14.8 48 14 47.2 14 46V14C14 12.8 14.8 12 16 12Z"
+    fill="#ffffff"
+  />
+  
+  <path
+    d="M28 12H40V24L34 20L28 24V12Z"
+    fill="#f59e0b"
+    stroke="#d97706"
+    stroke-width="1.5"
+  />
+  
+  <path
+    d="M44 56H12C9.8 56 8 54.2 8 52C10.2 54.2 12.6 54 12.6 54H44C46.2 54 48 52.2 48 50V48C48 50.2 46.4 56 44 56Z"
+    fill="rgba(0, 0, 0, 0.1)"
+  />
+</svg>
+
+          </div>
+          <h3 className="text-lg font-semibold text-indigo-600 mb-2 italic bold">
+            Access Resources
+          </h3>
+          <p className="text-sm text-gray-600 italic bold">
+            Find essential resources and contacts at your fingertips.
+          </p>
+        </div>
+      </div>
+
+      {/* Call to Action */}
+      <button
+        onClick={() => navigate('/signin')}
+        className="mt-8  bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-lg text-lg font-semibold shadow-md transform hover:scale-105 transition-transform"
+      >
+        Sign In to Get Started
+      </button>
+    </div>
+        
+        </> : <>
+        
+        {isAuth && (
+        <div className="p-4">
+          <div className="flex justify-between items-center mb-4">
+            <input
+              type="text"
+              placeholder="Search reports..."
+              className="p-2 border rounded-lg w-full"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              disabled={loading}
+            />
+            <select
+              value={filterStatus}
+              onChange={(e) => setFilterStatus(e.target.value)}
+              className="p-2 border rounded-lg ml-4"
+              disabled={loading}
+            >
+              <option value="All">All</option>
+              <option value="Pending">Pending</option>
+              <option value="Resolved">Resolved</option>
+            </select>
+          </div>
+
           {loading ? (
-            <div className="animate-pulse">
-              <div className="h-5 w-40 bg-white/40 rounded"></div>
-              <div className="h-4 w-28 bg-white/30 rounded mt-2"></div>
+            <div className="animate-pulse">Loading...</div>
+          ) : filteredReports.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {filteredReports.map((report) => (
+                <ReportCard key={report._id} report={report} />
+              ))}
             </div>
           ) : (
-            <>
-              <h1 className="text-2xl font-semibold">{`${greeting}, ${userName || 'User'}!`}</h1>
-              <p className="text-sm">{isAuth ? "Here's your activity overview." : 'Secure your campus by reporting incidents.'}</p>
-            </>
+            <div className="text-center mt-8">No matching reports found.</div>
           )}
         </div>
-        <div className="flex items-center">
-          <button
-            className="relative flex items-center justify-center bg-white text-blue-600 font-bold h-12 w-12 rounded-full border-2 border-white shadow-md"
-            onClick={() => navigate('/profile')}
-          >
-            {userName ? userName.charAt(0).toUpperCase() : 'U'}
-            <span className="absolute top-0 right-0 h-3 w-3 bg-green-400 border-2 border-white rounded-full"></span>
-          </button>
-        </div>
+      )}
+        
+        </>
+      }
+
+
+      <SirenButton/>
+      <div className="mt-32">
+        <BottomNavbar />
       </div>
-
-      <div className="p-4">
-        <div className="flex justify-between items-center mb-4">
-          <input
-            type="text"
-            placeholder="Search reports..."
-            className="p-2 border rounded-lg w-full"
-            onChange={(e) => setSearchTerm(e.target.value)}
-            disabled={loading}
-          />
-          <select
-            value={filterStatus}
-            onChange={(e) => setFilterStatus(e.target.value)}
-            className="p-2 border rounded-lg ml-4"
-            disabled={loading}
-          >
-            <option value="All">All</option>
-            <option value="Pending">Pending</option>
-            <option value="Resolved">Resolved</option>
-          </select>
-        </div>
-
-        {loading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {Array.from({ length: 2 }).map((_, index) => (
-              <div
-                key={index}
-                className="bg-white p-6 rounded-xl shadow-md animate-pulse"
-              >
-                <div className="h-5 bg-gray-300 rounded w-2/3 mb-4"></div>
-                <div className="h-4 bg-gray-200 rounded w-5/6 mb-2"></div>
-                <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <>
-            {isAuth && filteredReports.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {filteredReports.map((report) => (
-                            <ReportCard key={report._id} report={report} />
-                ))}
-              </div>
-            ) : (
-              <div className="text-center mt-8">
-                <p className="text-gray-500">No reports available. Create one to get started!</p>
-                <button
-                  onClick={() => navigate('/create-report')}
-                  className="mt-4 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-                >
-                  Create Report
-                </button>
-              </div>
-            )}
-          </>
-        )}
-
-        {!showAllReports && reports.length > 2 && !loading && (
-            <div className="flex justify-center mt-6 mb-12">
-  <button
-    onClick={handleViewMore}
-    className="px-8 py-3 bg-transparent text-gray-700 font-medium rounded-full border border-gray-400 shadow-sm hover:bg-gray-100 hover:shadow-md flex items-center gap-2 transition-all duration-300 transform hover:-translate-y-1 focus:ring-2 focus:ring-gray-300 focus:outline-none"
-  >
-    <span>View More</span>
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      className="h-5 w-5 text-gray-700"
-      fill="none"
-      viewBox="0 0 24 24"
-      stroke="currentColor"
-      strokeWidth="2"
-    >
-      <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-    </svg>
-  </button>
-  </div>
-
-
-        )}
-      </div>
-
-      <div className="mt-32 flex justify-end pr-4">
-      <SirenButton />
-      </div>
-      <BottomNavbar />
-
     </>
   );
 };
 
+
 export default Homepage;
+
 
 
 const ReportCard = ({ report }) => {
