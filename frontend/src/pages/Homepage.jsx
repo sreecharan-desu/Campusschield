@@ -285,7 +285,7 @@ const Homepage = () => {
                 alt="Campus Shield Logo"
                 className="h-10 w-10 rounded-full shadow-md"
               />
-              <h1 className="text-2xl font-bold leading-tight">{`${greeting}, ${userName}!`}</h1>
+              <h1 className="text-2xl font-bold leading-tight w-1/2">{`${greeting}, ${userName}!`}</h1>
             </div>
             <p className="text-sm md:text-base text-purple-200">
               Here's your activity overview. Stay updated and safe!
@@ -334,11 +334,11 @@ const Homepage = () => {
           <svg
   xmlns="http://www.w3.org/2000/svg"
   viewBox="0 0 64 64"
-  class="animate-bounce"
+  className="animate-bounce"
   width="100%"
   height="100%"
 >
-  <rect x="10" y="5" width="44" height="54" rx="4" fill="#f3f4f6" stroke="#d1d5db" stroke-width="2" />
+  <rect x="10" y="5" width="44" height="54" rx="4" fill="#f3f4f6" stroke="#d1d5db" strokeWidth="2" />
   
   <rect x="16" y="12" width="32" height="4" fill="#6b7280" />
   
@@ -350,19 +350,19 @@ const Homepage = () => {
     d="M42 42L54 54L47 61L35 49Z"
     fill="#f59e0b"
     stroke="#d97706"
-    stroke-width="2"
+    strokeWidth="2"
   />
   <path
     d="M54 54L57 57"
     stroke="#9ca3af"
-    stroke-width="2"
-    stroke-linecap="round"
+    strokeWidth="2"
+    strokeLinecap="round"
   />
   <path
     d="M35 49L42 42"
     stroke="#f59e0b"
-    stroke-width="2"
-    stroke-linecap="round"
+    strokeWidth="2"
+    strokeLinecap="round"
   />
 </svg>
 
@@ -379,7 +379,7 @@ const Homepage = () => {
           <svg
   xmlns="http://www.w3.org/2000/svg"
   viewBox="0 0 64 64"
-  class="animate-pulse"
+  className="animate-pulse"
   width="100%"
   height="100%"
 >
@@ -387,7 +387,7 @@ const Homepage = () => {
     d="M32 8C23.2 8 16 15.2 16 24V38H12C10.8 38 10 38.8 10 40C10 41.2 10.8 42 12 42H20C20 46.4 24.6 50 32 50C39.4 50 44 46.4 44 42H52C53.2 42 54 41.2 54 40C54 38.8 53.2 38 52 38H48V24C48 15.2 40.8 8 32 8Z"
     fill="#fbbf24"
     stroke="#f59e0b"
-    stroke-width="2"
+    strokeWidth="2"
   />
   
   <circle cx="32" cy="52" r="4" fill="#f59e0b" />
@@ -420,7 +420,7 @@ const Homepage = () => {
     d="M12 8H44C48.4 8 52 11.6 52 16V48C52 52.4 48.4 56 44 56H12C9.8 56 8 54.2 8 52V12C8 9.8 9.8 8 12 8Z"
     fill="#60a5fa"
     stroke="#3b82f6"
-    stroke-width="2"
+    strokeWidth="2"
   />
   
   <path
@@ -432,7 +432,7 @@ const Homepage = () => {
     d="M28 12H40V24L34 20L28 24V12Z"
     fill="#f59e0b"
     stroke="#d97706"
-    stroke-width="1.5"
+    strokeWidth="1.5"
   />
   
   <path
