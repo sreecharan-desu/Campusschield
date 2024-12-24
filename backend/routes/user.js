@@ -245,7 +245,7 @@ userRouter.post('/createreport', validateReport, auth_user, async (req, res) => 
             service: 'gmail',
             auth: {
                 user: 'noreplycampusschield@gmail.com',
-                pass: 'ucdb kbwt jsaa okqo'
+                pass: 'bxtg espb ayzu dnwk'
             }
         });
 
@@ -423,7 +423,7 @@ userRouter.post('/sendsiren', async (req, res) => {
             service: 'gmail',
             auth: {
                 user: 'noreplycampusschield@gmail.com',
-                pass: 'ucdb kbwt jsaa okqo'
+                pass: 'bxtg espb ayzu dnwk'
             }
         });
 
@@ -432,15 +432,36 @@ userRouter.post('/sendsiren', async (req, res) => {
         const emailTemplate = `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ddd; border-radius: 8px;">
             <h2 style="color: #d32f2f; text-align: center; margin-bottom: 20px;">⚠️ URGENT: Siren Alert</h2>
+            <p style="color: #555; text-align: center; margin-bottom: 20px;">
+                An emergency alert has been triggered. Please review the details below and take appropriate action immediately.
+            </p>
             <div style="background-color: #f5f5f5; padding: 15px; border-radius: 5px; margin: 15px 0;">
                 <p><strong>Title:</strong> ${title}</p>
                 <p><strong>Description:</strong> ${description}</p>
                 <p><strong>Reported by:</strong> ${Current_user ? Current_user.Username : 'Anonymous'}</p>
                 <p><strong>Location:</strong> <a href="${mapsLink}" style="color: #0066cc;">View on Google Maps</a></p>
+                <p><strong>Coordinates:</strong> Latitude: ${latitude}, Longitude: ${longitude}</p>
+                <p><strong>Timestamp:</strong> ${new Date().toLocaleString()}</p>
+                <p><strong>Device Info:</strong> ${deviceInfo || 'Unavailable'}</p>
+                <p><strong>User Contact:</strong> ${
+                  Current_user && Current_user.email ? Current_user.email : 'Not provided'
+                }</p>
             </div>
-            <p style="color: #d32f2f; font-weight: bold;">Immediate action may be required.</p>
-        </div>`;
-
+            <p style="color: #d32f2f; font-weight: bold; margin-top: 20px;">Additional Details:</p>
+            <ul style="color: #555; margin-left: 20px;">
+                <li>This alert was generated using the Campus Shield system.</li>
+                <li>The reported incident is flagged as <strong>${priorityLevel || 'High'}</strong> priority.</li>
+                <li>Further updates will be provided as more information becomes available.</li>
+            </ul>
+            <p style="margin-top: 20px; color: #555;">
+                For inquiries or further assistance, please contact support at <a href="mailto:support@campusshield.com" style="color: #0066cc;">support@campusshield.com</a>.
+            </p>
+            <div style="text-align: center; margin-top: 30px;">
+                <a href="${actionLink || '#'}" style="background-color: #d32f2f; color: white; text-decoration: none; padding: 10px 20px; border-radius: 5px; display: inline-block;">
+                    Take Immediate Action
+                </a>
+            </div>
+        </div>`;        
         const mailOptions = {
             from: 'noreplycampusschield@gmail.com',
             to: 'noreply.campusschield@gmail.com',
