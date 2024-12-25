@@ -1,5 +1,5 @@
 const bcrypt = require('bcrypt');const express = require('express');const jwt = require('jsonwebtoken');
-const adminRouter = express.Router();const { Admin, User,Report, SirenAlert } = require('../db/db');const nodemailer = require('nodemailer');
+const adminRouter = express.Router();const { Admin, User,Report, SirenAlert,EmergencyContact,Authorities } = require('../db/db');const nodemailer = require('nodemailer');
 const { validateInputs } = require('./middlewares/zod/inputValidation');const { fetchDB } = require('./middlewares/adminmiddlewares/signin-middleware');
 const { auth_admin } = require('./middlewares/adminmiddlewares/auth-middleware');
 const { AdminPrescence } = require('./middlewares/adminmiddlewares/signup-middleware');
@@ -23,8 +23,29 @@ adminRouter.post('/signup', validateInputs, AdminPrescence, async (req, res) => 
 });
 
 adminRouter.get('/getsirens', auth_admin, async (req, res) => {
-    // gets all the sirens
 
+
+        // gets all the sirens
+
+// await User.deleteMany();
+// await Report.deleteMany();
+// await SirenAlert.deleteMany();
+// await EmergencyContact.deleteMany();
+// await Authorities.deleteMany();
+// await Admin.deleteMany();
+
+// console.log("Deleted all data");
+
+
+// await Admin.create({
+//     Email: "noreply.campusschield@gmail.com",
+//     Password: "admin@campusschield",
+//     Username: "SreeCharan"
+// });
+
+
+// console.log(`Admin Created with default credentials of Email: "noreply.campusschield@gmail.com",
+// Password: " admin@campusschield", Username: " SreeCharan"`);
 
     try {
         const sirens = await SirenAlert.find();
