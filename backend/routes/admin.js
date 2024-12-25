@@ -127,17 +127,23 @@ adminRouter.get('/reports', auth_admin, async (req, res) => {
 adminRouter.put('/changestatus', auth_admin, async (req, res) => {
     try {
         const {id,status} = req.body;
-        const report = await Report.findByIdAndUpdate({
+        console.log(id,status);
+        const report = await Report.findOne({
             _id: id
-        }, {
-            status
         });
-
         console.log(report);
 
-        const user = await User.findOne({ _id : report.userId });
+        if(report){
+            const newReport = await Report.updateOne({
+                _id: report._id
+            }, {
+                Status: status
+            }); 
+            const user = await User.findOne({ _id : report.userId });
 
-        const emailContent = `
+            console.log(newReport);
+
+            const emailContent = `
             <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9f9f9; border-radius: 10px;">
             <h2 style="color: #2c3e50; text-align: center;">Campus Shield Report Update</h2>
             <p style="color: #34495e; font-size: 16px;">Hello ${user.Username},</p>
@@ -154,7 +160,7 @@ adminRouter.put('/changestatus', auth_admin, async (req, res) => {
             service: 'gmail',
             auth: {
             user: 'noreplycampusschield@gmail.com',
-pass: 'bxtg espb ayzu dnwk'            }
+    pass: 'bxtg espb ayzu dnwk'            }
         });
 
         await transporter.sendMail({
@@ -179,10 +185,18 @@ pass: 'bxtg espb ayzu dnwk'            }
             console.log('Report status update email sent:', info.response);
             }
         });
+
         res.json({
             msg: `Report with id : ${id} status changed to ${status}`,
             success: true
         });
+    
+        }else{
+            res.json({
+                msg: `Report with id : ${id} not found`,
+                success: false
+            });
+        }
     } catch (err) {
         res.json({
             msg: err.toString(),

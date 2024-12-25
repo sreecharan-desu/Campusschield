@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { data, useNavigate } from 'react-router-dom';
 import { Loader2, AlertCircle, UserX, Trash2, MapPin, Filter, Download, Calendar, Search, Bell, Users, FileText, AlertTriangle } from 'lucide-react';
 
 const AdminDashboard = () => {
@@ -21,7 +21,8 @@ const AdminDashboard = () => {
   const navigate = useNavigate();
   const adminData = JSON.parse(localStorage.getItem('adminData') || '{}');
   const token = localStorage.getItem('adminToken');
-  const API_BASE_URL = 'https://campus-schield-backend-api.vercel.app/api/v1/admin';
+  // const API_BASE_URL = 'https://campus-schield-backend-api.vercel.app/api/v1/admin';
+  const API_BASE_URL = 'http://localhost:5000/api/v1/admin';
   let sirenAudio = new Audio('/siren.mp3');
 
   // Fetch Data Functions
@@ -59,29 +60,50 @@ const AdminDashboard = () => {
       const response = await fetch(`${API_BASE_URL}/getsirens`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-
+  
       if (!response.ok) {
         throw new Error('Failed to fetch sirens');
       }
-
+  
       const data = await response.json();
       const prevAlerts = JSON.parse(localStorage.getItem('sirenAlerts') || '[]');
-
+  
       if (data.success) {
         setSirenAlerts(data.sirens);
+  
         if (data.sirens.length > prevAlerts.length) {
-          sirenAudio.play();
+          // Play the siren audio
           sirenAudio.loop = true;
-          setTimeout(() => sirenAudio.pause(), 10000);
+  
+          sirenAudio.play()
+            .then(() => {
+              console.log('Siren audio playing...');
+            })
+            .catch((error) => {
+              console.error('Audio playback failed:', error);
+              console.log('Audio playback is blocked. Please allow sound or interact with the page.');
+            });
+  
+          // Stop the audio after 10 seconds
+          setTimeout(() => {
+            if (!sirenAudio.paused) {
+              sirenAudio.pause();
+              sirenAudio.currentTime = 0; // Reset audio
+              console.log('Siren audio paused after 10 seconds');
+            }
+          }, 10000);
         }
       }
-      setTimeout(()=>{
+  
+      // Update localStorage with a slight delay to avoid conflicts
+      setTimeout(() => {
         localStorage.setItem('sirenAlerts', JSON.stringify(data.sirens));
       }, 2000);
+  
     } catch (err) {
       console.error('Failed to fetch sirens:', err);
     }
-  };
+  };  
 
   // Effect Hooks
   useEffect(() => {
@@ -90,8 +112,9 @@ const AdminDashboard = () => {
       return;
     }
     fetchData();
-    const sirenInterval = setInterval(fetchSirenAlerts, 2000);
-    return () => clearInterval(sirenInterval);
+    const dataInterval  = setInterval(fetchData,10000);
+    const sirenInterval = setInterval(fetchSirenAlerts, 5000);
+    return () => {clearInterval(sirenInterval); clearInterval(dataInterval)};
   }, [token, navigate]);
 
   useEffect(() => {
@@ -124,6 +147,7 @@ const AdminDashboard = () => {
   };
 
   const handleStatusChange = async (reportId, newStatus) => {
+    console.log(reportId, newStatus);
     try {
       const response = await fetch(`${API_BASE_URL}/changestatus`, {
         method: 'PUT',
