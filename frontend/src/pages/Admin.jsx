@@ -21,8 +21,8 @@ const AdminDashboard = () => {
   const navigate = useNavigate();
   const adminData = JSON.parse(localStorage.getItem('adminData') || '{}');
   const token = localStorage.getItem('adminToken');
-  // const API_BASE_URL = 'https://campus-schield-backend-api.vercel.app/api/v1/admin';
-  const API_BASE_URL = 'http://localhost:5000/api/v1/admin';
+  const API_BASE_URL = 'https://campus-schield-backend-api.vercel.app/api/v1/admin';
+  // const API_BASE_URL = 'http://localhost:5000/api/v1/admin';
   let sirenAudio = new Audio('/siren.mp3');
 
   // Fetch Data Functions
@@ -284,25 +284,27 @@ const AdminDashboard = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Navigation Bar */}
-      <nav className="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 shadow-lg border-b sticky top-0 z-50">
+      <nav className="bg-teal-700 shadow-lg border-b sticky top-0 z-50">
   <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     <div className="flex justify-between items-center h-16">
       {/* Left Section */}
-      <div className="flex items-center space-x-4">
-        <img src="/vite.svg" alt="Logo" className="h-10 w-10" />
-        <h1 className="text-2xl font-extrabold text-white">Campus Shield Admin</h1>
-        <div className="hidden md:flex space-x-4 ml-8 text-white">
+      <div className="flex items-center space-x-6">
+        <img src="/vite.svg" alt="Logo" className="h-10 w-10 rounded-full shadow-md" />
+        <h1 className="text-2xl font-extrabold text-white tracking-wide">
+          Campus <span className="text-yellow-400">Shield</span> Admin
+        </h1>
+        <div className="hidden md:flex space-x-6 ml-8 text-white">
           <div className="text-sm">
-            <span className="text-gray-200">Users:</span>
-            <span className="ml-1 font-semibold">{stats.totalUsers}</span>
+            <span className="text-gray-100">Users:</span>
+            <span className="ml-1 font-bold text-yellow-400">{stats.totalUsers}</span>
           </div>
           <div className="text-sm">
-            <span className="text-gray-200">Reports:</span>
-            <span className="ml-1 font-semibold">{stats.totalReports}</span>
+            <span className="text-gray-100">Reports:</span>
+            <span className="ml-1 font-bold text-yellow-400">{stats.totalReports}</span>
           </div>
           <div className="text-sm">
-            <span className="text-gray-200">Active:</span>
-            <span className="ml-1 font-semibold">{stats.activeReports}</span>
+            <span className="text-gray-100">Active:</span>
+            <span className="ml-1 font-bold text-yellow-400">{stats.activeReports}</span>
           </div>
         </div>
       </div>
@@ -310,20 +312,24 @@ const AdminDashboard = () => {
       {/* Right Section */}
       <div className="flex items-center space-x-6">
         <div className="relative">
-          <Bell 
-            className={`h-6 w-6 ${sirenAlerts.length > 0 ? 'text-red-500 animate-bounce' : 'text-white'}`} 
-            title={`${sirenAlerts.length} active alerts`} 
+          <Bell
+            className={`h-6 w-6 ${
+              sirenAlerts.length > 0 ? 'text-red-400 animate-bounce' : 'text-white'
+            } transition-colors duration-300`}
+            title={`${sirenAlerts.length} active alerts`}
           />
           {sirenAlerts.length > 0 && (
-            <span className="absolute top-0 right-0 inline-flex items-center justify-center h-4 w-4 text-xs font-bold text-white bg-red-500 rounded-full animate-pulse">
+            <span className="absolute top-0 right-0 inline-flex items-center justify-center h-5 w-5 text-xs font-bold text-white bg-red-500 rounded-full animate-pulse shadow-lg">
               {sirenAlerts.length}
             </span>
           )}
         </div>
-        <span className="text-white font-medium">Welcome, {adminData.username}</span>
+        <span className="text-white font-medium bg-teal-800 px-3 py-1 rounded-lg shadow-md transition-transform transform hover:scale-105">
+          Welcome, {adminData.username}
+        </span>
         <button
           onClick={handleLogout}
-          className="px-4 py-2 text-sm font-semibold text-white bg-red-600 rounded-lg hover:bg-red-700 shadow-md transition-transform transform hover:scale-105"
+          className="px-4 py-2 text-sm font-semibold text-white bg-red-600 rounded-lg shadow-lg hover:shadow-xl transition-transform transform hover:scale-105"
         >
           Logout
         </button>
@@ -331,6 +337,9 @@ const AdminDashboard = () => {
     </div>
   </div>
 </nav>
+
+
+
 
 
       <main className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
@@ -454,82 +463,234 @@ const AdminDashboard = () => {
         {/* Data View */}
         <div className="mt-4">
         {view === 'users' && (
-  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-    {getFilteredData(users, 'users').map(user => (
+  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8">
+    {users.map((user) => (
       <div
         key={user._id}
-        className="p-4 bg-white shadow rounded-md border"
+        className="p-6 bg-white  shadow-md border rounded-lg hover:shadow-xl transform hover:-translate-y-1 transition duration-300"
       >
-        <h3 className="text-lg font-semibold text-gray-800">
-          {user.Username || "Not Provided"}
-        </h3>
-        <p className="text-sm text-gray-600">{user.CollegeEmail || "Not Provided"}</p>
-        <p className="text-sm text-gray-500">College: {user.College || "Not Provided"}</p>
-        <p className="text-sm text-gray-500">Course: {user.Course || "Not Provided"}</p>
-        <p className="text-sm text-gray-500">Year: {user.Year || "Not Provided"}</p>
-        <p className="text-sm text-gray-500">Personal Email: {user.PersonalEmail || "Not Provided"}</p>
-        <p className="text-sm text-gray-500">Phone: {user.Phone || "Not Provided"}</p>
-        <p className="text-sm text-gray-500">Address: {user.Address || "Not Provided"}</p>
-        <p className="text-sm text-gray-500">Blood Group: {user.BloodGroup || "Not Provided"}</p>
-        <p className="text-sm text-gray-500">Medical Conditions: {user.MedicalConditions || "Not Provided"}</p>
-        <p className="text-sm text-gray-500">Allergies: {user.Allergies || "Not Provided"}</p>
-        <p className="text-sm text-gray-500">Medications: {user.Medications || "Not Provided"}</p>
-        <p className="text-sm text-gray-500">Emergency Contact: {user.EmergencyContact || "Not Provided"}</p>
-        <p className="text-sm text-gray-500">Created At: {user.createdAt || "Not Provided"}</p>
-        <p className="text-sm text-gray-500">Updated At: {user.updatedAt || "Not Provided"}</p>
-        <button
-          onClick={() => handleDeleteUser(user._id)}
-          className="mt-2 px-4 py-2 bg-red-600 text-white text-sm rounded-md hover:bg-red-700 transition"
-        >
-          Delete User
-        </button>
+        {/* Header Section */}
+        <div className="flex items-center justify-between">
+          <h3 className="text-xl font-bold text-gray-800 truncate flex items-center">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-6 w-6 mr-2 text-blue-500"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M5.121 17.804A10.002 10.002 0 0111 2a10.002 10.002 0 016.879 15.804M9 12h6m-3-3v6"
+              />
+            </svg>
+            {user.Username || "No Name"}
+          </h3>
+          <button
+            onClick={() => handleDeleteUser(user._id)}
+            className="px-3 py-1 text-sm bg-red-500 text-white rounded-lg hover:bg-red-600 focus:outline-none transition duration-300 flex items-center"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-5 w-5 mr-1"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M19 7l-.867 12.142A2 2 0 0116.134 21H7.866a2 2 0 01-1.999-1.858L5 7m5 4v6m4-6v6M9 7h6m-6 0a3 3 0 016 0"
+              />
+            </svg>
+            Delete
+          </button>
+        </div>
+        {/* Information Section */}
+        <div className="mt-4 space-y-3">
+          <p className="text-sm text-gray-600 flex items-center">
+            <strong>ID:</strong> {user._id}
+          </p>
+          {/* <p className="text-sm text-gray-600 flex items-center">
+            <strong>Password Hash:</strong> {user.Password}
+          </p> */}
+          <p className="text-sm text-gray-600 flex items-center">
+            <strong>Personal Email:</strong> {user.PersonalEmail || "Not Provided"}
+          </p>
+          <p className="text-sm text-gray-600 flex items-center">
+            <strong>College Email:</strong> {user.CollegeEmail || "Not Provided"}
+          </p>
+          <p className="text-sm text-gray-600 flex items-center">
+            <strong>Phone:</strong> {user.Phone || "Not Provided"}
+          </p>
+          <p className="text-sm text-gray-600 flex items-center">
+            <strong>Address:</strong> {user.Address || "Not Provided"}
+          </p>
+          <p className="text-sm text-gray-600 flex items-center">
+            <strong>College:</strong> {user.College || "Not Provided"}
+          </p>
+          <p className="text-sm text-gray-600 flex items-center">
+            <strong>Course:</strong> {user.Course || "Not Provided"}
+          </p>
+          <p className="text-sm text-gray-600 flex items-center">
+            <strong>Year:</strong> {user.Year || "Not Provided"}
+          </p>
+          <p className="text-sm text-gray-600 flex items-center">
+            <strong>Blood Group:</strong> {user.BloodGroup || "Not Provided"}
+          </p>
+          <p className="text-sm text-gray-600 flex items-center">
+            <strong>Medical Conditions:</strong> {user.MedicalConditions || "Not Provided"}
+          </p>
+          <p className="text-sm text-gray-600 flex items-center">
+            <strong>Allergies:</strong> {user.Allergies || "Not Provided"}
+          </p>
+          <p className="text-sm text-gray-600 flex items-center">
+            <strong>Medications:</strong> {user.Medications || "Not Provided"}
+          </p>
+          <p className="text-sm text-gray-600 flex items-center">
+            <strong>Emergency Contact:</strong> {user.EmergencyContact || "Not Provided"}
+          </p>
+          <p className="text-sm text-gray-600 flex items-center">
+            <strong>Created At:</strong> {new Date(user.createdAt).toLocaleString() || "Not Provided"}
+          </p>
+          <p className="text-sm text-gray-600 flex items-center">
+            <strong>Updated At:</strong> {new Date(user.updatedAt).toLocaleString() || "Not Provided"}
+          </p>
+        </div>
       </div>
     ))}
   </div>
-)}{view === 'reports' && (
+        )}
+
+
+
+
+{view === 'reports' && (
   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-    {getFilteredData(reports, 'reports').length === 0 ? <>
-      <p className='text-gray font-bold text-center'> No Reports found.</p>
-    </> : <></>}
-    {getFilteredData(reports, 'reports').map(report => (
+    {getFilteredData(reports, 'reports').length === 0 ? (
+      <p className="text-gray-500 font-bold text-center">No Reports Found.</p>
+    ) : null}
+    {getFilteredData(reports, 'reports').map((report) => (
       <div
         key={report._id}
-        className="p-4 bg-white shadow rounded-md border"
+        className="p-6 bg-white shadow-lg border rounded-lg hover:shadow-xl transform hover:-translate-y-1 transition duration-300"
       >
-        <h3 className="text-lg font-semibold text-gray-800">
+        {/* Title */}
+        <h3 className="text-lg font-semibold text-gray-800 truncate flex items-center">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-6 w-6 mr-2 text-blue-500"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M3 10h1v4H3V9.5L7.5 7 11 9.5V10h1"
+            />
+          </svg>
           {report.Title || "Not Provided"}
         </h3>
-        <p className="text-sm text-gray-600">{report.Description || "Not Provided"}</p>
-        <p className="text-sm text-gray-500">Status: {report.Status || "Not Provided"}</p>
-        <p className="text-sm text-gray-500">Time: {report.Time ? new Date(report.Time).toLocaleString() : "Not Provided"}</p>
-        <p className="text-sm text-gray-500">Created: {report.createdAt ? new Date(report.createdAt).toLocaleString() : "Not Provided"}</p>
-        <p className="text-sm text-gray-500">
-  <a 
-    href={`https://www.google.com/maps?q=${report.Location.latitude},${report.Location.longitude}`} 
-    target="_blank" 
-    rel="noopener noreferrer" 
-    className="text-blue-500 underline"
-  >
-    Location: {report.Location.latitude}, {report.Location.longitude}
-  </a>
-</p>        <p className="text-sm text-gray-500">Harasser Details: {report.HarasserDetails || "Not Provided"}</p>
-        <p className="text-sm text-gray-500">Video: {report.VideoLink || "Not Provided"}</p>
-        <p className="text-sm text-gray-500">Image: {report.ImageLink || "Not Provided"}</p>
-        <p className="text-sm text-gray-500">Audio: {report.AudioLink || "Not Provided"}</p>
-        <p className="text-sm text-gray-500">Report To: {report.WhomToReport || "Not Provided"}</p>
-        <p className="text-sm text-gray-500">User ID: {report.userId || "Not Provided"}</p>
-        
-        <div className="flex space-x-2 mt-2">
-          {report.Status !== 'Resolved' ? <>
-            <button
-            onClick={() => handleStatusChange(report._id, 'Resolved')}
-            className="px-4 py-2 bg-green-600 text-white text-sm rounded-md hover:bg-green-700 transition"
+
+        {/* Description */}
+        <p className="mt-2 text-sm text-gray-600">{report.Description || "Not Provided"}</p>
+
+        {/* Status Tag */}
+        <div className="mt-3">
+          <span
+            className={`inline-block px-3 py-1 text-sm font-semibold rounded-full ${
+              report.Status === "Resolved"
+                ? "bg-green-100 text-green-600"
+                : "bg-yellow-100 text-yellow-600"
+            }`}
           >
-            Mark Resolved
-          </button>
-          </> : <>
-          <p className='text-green font-bold italic'>Resolved</p>
-          </>}
+            {report.Status || "Not Provided"}
+          </span>
+        </div>
+
+        {/* Time */}
+        <p className="text-sm text-gray-500 mt-2">
+          <span className="font-bold">Time:</span>{" "}
+          {report.Time ? new Date(report.Time).toLocaleString() : "Not Provided"}
+        </p>
+
+        {/* Created At */}
+        <p className="text-sm text-gray-500">
+          <span className="font-bold">Created:</span>{" "}
+          {report.createdAt ? new Date(report.createdAt).toLocaleString() : "Not Provided"}
+        </p>
+
+        {/* Location */}
+        <div className="mt-2 flex items-start">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-6 w-6 text-gray-600 mt-0.5"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M12 2C8.686 2 6 4.686 6 8c0 3.886 5.25 8.58 5.25 8.58s5.25-4.694 5.25-8.58c0-3.314-2.686-6-6-6z"
+            />
+          </svg>
+          <a
+            href={`https://www.google.com/maps?q=${report.Location.latitude},${report.Location.longitude}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-blue-500 underline ml-2"
+          >
+            Location: {report.Location.latitude}, {report.Location.longitude}
+          </a>
+        </div>
+
+        {/* Harasser Details */}
+        <p className="text-sm text-gray-500 mt-2">
+          <span className="font-bold">Harasser Details:</span> {report.HarasserDetails || "Not Provided"}
+        </p>
+
+        {/* Media Links */}
+        <div className="mt-2 space-y-1">
+          <p className="text-sm text-gray-500">
+            <span className="font-bold">Video:</span> {report.VideoLink || "Not Provided"}
+          </p>
+          <p className="text-sm text-gray-500">
+            <span className="font-bold">Image:</span> {report.ImageLink || "Not Provided"}
+          </p>
+          <p className="text-sm text-gray-500">
+            <span className="font-bold">Audio:</span> {report.AudioLink || "Not Provided"}
+          </p>
+        </div>
+
+        {/* Whom To Report */}
+        <p className="text-sm text-gray-500 mt-2">
+          <span className="font-bold">Report To:</span> {report.WhomToReport || "Not Provided"}
+        </p>
+
+        {/* User ID */}
+        <p className="text-sm text-gray-500">
+          <span className="font-bold">User ID:</span> {report.userId || "Not Provided"}
+        </p>
+
+        {/* Buttons */}
+        <div className="flex justify-between items-center mt-4">
+          {report.Status !== "Resolved" ? (
+            <button
+              onClick={() => handleStatusChange(report._id, "Resolved")}
+              className="px-4 py-2 bg-green-600 text-white text-sm rounded-md hover:bg-green-700 transition"
+            >
+              Mark Resolved
+            </button>
+          ) : (
+            <p className="text-green-600 font-bold italic">Resolved</p>
+          )}
           <button
             onClick={() => handleDeleteReport(report._id)}
             className="px-4 py-2 bg-red-600 text-white text-sm rounded-md hover:bg-red-700 transition"
@@ -540,37 +701,109 @@ const AdminDashboard = () => {
       </div>
     ))}
   </div>
-)}{view === 'sirens' && (
+)}
+
+
+
+{view === 'sirens' && (
   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-    {sirenAlerts.length === 0 ? <>
-      <p className='text-gray font-bold text-center'> No Sirens found.</p>
-    </> : <></>}
-    {sirenAlerts.map(alert => (
+    {sirenAlerts.length === 0 ? (
+      <p className="text-gray-500 font-bold text-center">No Sirens Found.</p>
+    ) : null}
+    {sirenAlerts.map((alert) => (
       <div
         key={alert._id}
-        className="p-4 bg-white shadow rounded-md border"
+        className="p-6 bg-white shadow-lg border rounded-lg hover:shadow-xl transform hover:-translate-y-1 transition duration-300"
       >
-        <h3 className="text-lg font-semibold text-gray-800">
-          {alert.Title}
+        {/* Title */}
+        <h3 className="text-lg font-semibold text-gray-800 truncate flex items-center">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-6 w-6 mr-2 text-red-500"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M10 2L14 2M4 5L20 5M5 20H19"
+            />
+          </svg>
+          {alert.Title || "No Title"}
         </h3>
-        <p className="text-sm text-gray-600">{alert.Description}</p>
-        <p className="text-sm text-gray-500">
-  <a 
-    href={`https://www.google.com/maps?q=${alert.Location.latitude},${alert.Location.longitude}`} 
-    target="_blank" 
-    rel="noopener noreferrer" 
-    className="text-blue-500 underline"
-  >
-    Location: {alert.Location.latitude}, {alert.Location.longitude}
-  </a>
-</p>
-        <p className="text-sm text-gray-500">
-          Time: {new Date(alert.Time).toLocaleString()}
-        </p>
+
+        {/* Description */}
+        <div className="mt-2 flex items-start">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-6 w-6 text-gray-600 mt-0.5"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M8 10h8m-4 0v6"
+            />
+          </svg>
+          <p className="text-sm text-gray-600 ml-2">{alert.Description || "No Description"}</p>
+        </div>
+
+        {/* Location */}
+        <div className="mt-2 flex items-start">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-6 w-6 text-gray-600 mt-0.5"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M12 2C8.686 2 6 4.686 6 8c0 3.886 5.25 8.58 5.25 8.58s5.25-4.694 5.25-8.58c0-3.314-2.686-6-6-6z"
+            />
+          </svg>
+          <a
+            href={`https://www.google.com/maps?q=${alert.Location.latitude},${alert.Location.longitude}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-blue-500 underline ml-2"
+          >
+            Location: {alert.Location.latitude}, {alert.Location.longitude}
+          </a>
+        </div>
+
+        {/* Time */}
+        <div className="mt-2 flex items-start">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-6 w-6 text-gray-600 mt-0.5"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M12 8v4l3 3"
+            />
+          </svg>
+          <p className="text-sm text-gray-500 ml-2">
+            Time: {alert.Time ? new Date(alert.Time).toLocaleString() : "No Time Provided"}
+          </p>
+        </div>
       </div>
     ))}
   </div>
 )}
+
 
 
         </div>
