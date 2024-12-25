@@ -793,6 +793,8 @@ userRouter.post('/forgotpassword',async (req, res) => {
             </div>
             `
         };
+        
+        console.log("Don't worry everything is fine Sending OTP to email ...");
 
         transporter.sendMail(mailOptions, (error, info) => {
             if (error) {
