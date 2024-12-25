@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Loader2, AlertCircle, Bell, Download, Search,Trash2,MapPin} from 'lucide-react';
+import { DocumentTextIcon } from '@heroicons/react/20/solid';
+import { Loader2, AlertCircle, Bell, Download, Search,Trash2,MapPin, Pointer,Salad} from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardContent } from '../components/ui/card';
 
 
@@ -297,6 +298,10 @@ const AdminDashboard = () => {
 
             <div className="flex items-center space-x-4">
               <div className="flex items-center space-x-4">
+                <div className="text-white underline text-white bold pointer" style={{cursor : "pointer"}} onClick={()=>navigate('/docs')}>
+                  {/* <DocumentTextIcon/> */}
+                  <b className='text-sm italic bold'>View our Docs</b>
+                </div>
                 <span className="text-white">Users: {stats.totalUsers}</span>
                 <span className="text-white">Reports: {stats.totalReports}</span>
                 <span className="text-white">Active: {stats.activeReports}</span>
