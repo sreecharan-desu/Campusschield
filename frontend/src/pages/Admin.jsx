@@ -284,27 +284,27 @@ const AdminDashboard = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Navigation Bar */}
-      <nav className="bg-teal-700 shadow-lg border-b sticky top-0 z-50">
+      <nav className="bg-black shadow-lg border-b border-gray-800 sticky top-0 z-50">
   <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     <div className="flex justify-between items-center h-16">
       {/* Left Section */}
       <div className="flex items-center space-x-6">
         <img src="/vite.svg" alt="Logo" className="h-10 w-10 rounded-full shadow-md" />
         <h1 className="text-2xl font-extrabold text-white tracking-wide">
-          Campus <span className="text-yellow-400">Shield</span> Admin
+          Campus <span className="text-gray-400">Shield</span> Admin
         </h1>
-        <div className="hidden md:flex space-x-6 ml-8 text-white">
-          <div className="text-sm">
-            <span className="text-gray-100">Users:</span>
-            <span className="ml-1 font-bold text-yellow-400">{stats.totalUsers}</span>
+        <div className="hidden md:flex space-x-6 ml-8">
+          <div className="text-sm text-gray-400">
+            <span className="text-white">Users:</span>
+            <span className="ml-1 font-bold">{stats.totalUsers}</span>
           </div>
-          <div className="text-sm">
-            <span className="text-gray-100">Reports:</span>
-            <span className="ml-1 font-bold text-yellow-400">{stats.totalReports}</span>
+          <div className="text-sm text-gray-400">
+            <span className="text-white">Reports:</span>
+            <span className="ml-1 font-bold">{stats.totalReports}</span>
           </div>
-          <div className="text-sm">
-            <span className="text-gray-100">Active:</span>
-            <span className="ml-1 font-bold text-yellow-400">{stats.activeReports}</span>
+          <div className="text-sm text-gray-400">
+            <span className="text-white">Active:</span>
+            <span className="ml-1 font-bold">{stats.activeReports}</span>
           </div>
         </div>
       </div>
@@ -314,22 +314,22 @@ const AdminDashboard = () => {
         <div className="relative">
           <Bell
             className={`h-6 w-6 ${
-              sirenAlerts.length > 0 ? 'text-red-400 animate-bounce' : 'text-white'
+              sirenAlerts.length > 0 ? 'text-red-500 animate-bounce' : 'text-gray-400'
             } transition-colors duration-300`}
             title={`${sirenAlerts.length} active alerts`}
           />
           {sirenAlerts.length > 0 && (
-            <span className="absolute top-0 right-0 inline-flex items-center justify-center h-5 w-5 text-xs font-bold text-white bg-red-500 rounded-full animate-pulse shadow-lg">
+            <span className="absolute top-0 right-0 inline-flex items-center justify-center h-5 w-5 text-xs font-bold text-white bg-red-600 rounded-full animate-pulse shadow-lg">
               {sirenAlerts.length}
             </span>
           )}
         </div>
-        <span className="text-white font-medium bg-teal-800 px-3 py-1 rounded-lg shadow-md transition-transform transform hover:scale-105">
+        <span className="text-white font-medium bg-gray-800 px-3 py-1 rounded-lg shadow-md transition-transform transform hover:scale-105">
           Welcome, {adminData.username}
         </span>
         <button
           onClick={handleLogout}
-          className="px-4 py-2 text-sm font-semibold text-white bg-red-600 rounded-lg shadow-lg hover:shadow-xl transition-transform transform hover:scale-105"
+          className="px-4 py-2 text-sm font-semibold text-white bg-gray-700 rounded-lg shadow-lg hover:shadow-xl transition-transform transform hover:scale-105"
         >
           Logout
         </button>
@@ -337,6 +337,7 @@ const AdminDashboard = () => {
     </div>
   </div>
 </nav>
+
 
 
 
@@ -808,6 +809,7 @@ const AdminDashboard = () => {
 
         </div>
       </main>
+      
     </div>
   );
 };
