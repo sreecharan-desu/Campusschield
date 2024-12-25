@@ -9,10 +9,10 @@ const DocsWebsite = () => {
     { id: 'introduction', name: 'Introduction' },
     { id: 'features', name: 'Core Features' },
     { id: 'technical', name: 'Technical Architecture' },
-    { id: 'security', name: 'Security & Privacy' },
-    { id: 'api', name: 'API Reference' },
-    { id: 'getting-started', name: 'Getting Started' },
-    { id: 'support', name: 'Support' }
+    // { id: 'security', name: 'Security & Privacy' },
+    // { id: 'api', name: 'API Reference' },
+    // { id: 'getting-started', name: 'Getting Started' },
+    // { id: 'support', name: 'Support' }
   ];
 
   const content = {

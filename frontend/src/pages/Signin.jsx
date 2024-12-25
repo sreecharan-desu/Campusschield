@@ -94,7 +94,7 @@ const Signin = () => {
         setForgotPasswordSuccess('');
 
         try {
-            const response = await axios.post('http://localhost:5000/api/v1/user/forgotpassword', {
+            const response = await axios.post('https://campus-schield-backend-api.vercel.app/api/v1/user/forgotpassword', {
                 college_email: forgotPasswordData.college_email
             });
 
