@@ -10,6 +10,8 @@ const { getReports } = require('./middlewares/usermiddlewares/helperFNs/getRepor
 const validateReport = require('./middlewares/zod/reportValidation');
 const profileValidation = require('./middlewares/zod/profileValidation');
 const zod = require('zod');
+const policeEmail = 'sreecharan309@gmail.com';
+const womeEmail = 'sreecoder06@gmail.com';
 
 //routes
 userRouter.post('/signup', validateInputs, verifyUserExistence, async (req, res) => {
@@ -295,10 +297,10 @@ userRouter.post('/createreport', validateReport, auth_user, async (req, res) => 
         let recipientEmail;
         switch (whom_to_report) {
             case 'police':
-                recipientEmail = 'sreecharan309@gmail.com';
+                recipientEmail = policeEmail;
                 break;
             case 'women_organization':
-                recipientEmail = 'o210008@rguktong.ac.in';
+                recipientEmail = womeEmail;
                 break;
             default:
                 recipientEmail = 'noreply.campusschield@gmail.com';
