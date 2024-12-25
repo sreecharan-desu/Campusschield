@@ -243,7 +243,8 @@ const AdminDashboard = () => {
     if (type === 'users') {
       filtered = filtered.filter(user =>
         (user.Username?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-         user.CollegeEmail?.toLowerCase().includes(searchTerm.toLowerCase())) &&
+         user.CollegeEmail?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+         user._id?.toLowerCase().includes(searchTerm.toLowerCase())) &&
         (!collegeFilter || user.College === collegeFilter) &&
         (!courseFilter || user.Course === courseFilter) &&
         (!yearFilter || user.Year === yearFilter)
@@ -251,7 +252,9 @@ const AdminDashboard = () => {
     } else if (type === 'reports') {
       filtered = filtered.filter(report =>
         (report.Title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-         report.Description?.toLowerCase().includes(searchTerm.toLowerCase())) &&
+         report.Description?.toLowerCase().includes(searchTerm.toLowerCase())||
+        report.userId?.toLowerCase().includes(searchTerm.toLowerCase())
+        ) &&
         (!filterStatus || report.Status === filterStatus)
       );
     }
