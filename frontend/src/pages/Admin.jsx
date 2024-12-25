@@ -21,8 +21,8 @@ const AdminDashboard = () => {
   const navigate = useNavigate();
   const adminData = JSON.parse(localStorage.getItem('adminData') || '{}');
   const token = localStorage.getItem('adminToken');
-  // const API_BASE_URL = 'https://campus-schield-backend-api.vercel.app/api/v1/admin';
-  const API_BASE_URL = 'http://localhost:5000/api/v1/admin';
+  const API_BASE_URL = 'https://campus-schield-backend-api.vercel.app/api/v1/admin';
+  // const API_BASE_URL = 'http://localhost:5000/api/v1/admin';
   let sirenAudio = new Audio('/siren.mp3');
 
   // Fetch Data Functions
