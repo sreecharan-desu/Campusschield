@@ -14,7 +14,7 @@ const AdminSignIn = () => {
     setLoading(true);
 
     try {
-      const response = await fetch('https://campus-schield-backend-api.vercel.app/api/v1/admin/signin', {
+      const response = await fetch('http://localhost:5000/api/v1/admin/signin', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

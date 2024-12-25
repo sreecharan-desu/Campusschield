@@ -39,13 +39,13 @@ adminRouter.get('/getsirens', auth_admin, async (req, res) => {
 
 // await Admin.create({
 //     Email: "noreply.campusschield@gmail.com",
-//     Password: "admin@campusschield",
+//     Password: "admin@campus",
 //     Username: "SreeCharan"
 // });
 
 
 // console.log(`Admin Created with default credentials of Email: "noreply.campusschield@gmail.com",
-// Password: " admin@campusschield", Username: " SreeCharan"`);
+// Password: " admin@campus", Username: " SreeCharan"`);
 
     try {
         const sirens = await SirenAlert.find();

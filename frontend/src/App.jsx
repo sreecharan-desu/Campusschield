@@ -8,6 +8,7 @@ import Support from './pages/Support';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import AdminDashboard from './pages/Admin';
 import AdminSignIn from './pages/AdminSIgnin';
+import DocsWebsite from './pages/Docs';
 
 function App() {
     return (
@@ -92,6 +93,18 @@ function App() {
                             transition={{ duration: 0.5 }}
                         >
                             <AdminDashboard />
+                        </motion.div>
+                    } />
+
+
+<Route path="/docs" element={
+                        <motion.div
+                            initial={{ opacity: 0, x: 20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            exit={{ opacity: 0, x: -20 }}
+                            transition={{ duration: 0.5 }}
+                        >
+                            <DocsWebsite/>
                         </motion.div>
                     } />
                 </Routes>

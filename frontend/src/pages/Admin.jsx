@@ -311,6 +311,11 @@ const AdminDashboard = () => {
 
       {/* Right Section */}
       <div className="flex items-center space-x-6">
+      <div className="relative">
+          <button onClick={()=>navigate('/docs')}>
+              Docs
+          </button>
+        </div>
         <div className="relative">
           <Bell
             className={`h-6 w-6 ${
