@@ -851,10 +851,28 @@ userRouter.post('/verifyotp', async (req, res) => {
         );
 
         res.json({
+            user: {
+                id: user._id,
+                username: user.Username,
+                college_email: user.CollegeEmail,
+                personal_email: user.PersonalEmail || null,
+                phone: user.Phone || null,
+                address: user.Address || null,
+                college: user.College || null,
+                course: user.Course || null,
+                year: user.Year || null,
+                blood_group: user.BloodGroup || null,
+                medical_conditions: user.MedicalConditions || null,
+                allergies: user.Allergies || null,
+                medications: user.Medications || null,
+                emergency_contact: emergencyContacts || null,
+                authorities_detail: authoritiesDetails || null,
+                created_at: user.createdAt
+            },
             msg: 'OTP verified successfully',
-            token: auth_token,
+            token : auth_token,
             success: true
-        });
+        })
     } catch (error) {
         res.status(500).json({
             msg: 'Error verifying OTP',
