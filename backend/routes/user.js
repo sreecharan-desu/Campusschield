@@ -793,7 +793,7 @@ userRouter.post('/forgotpassword',async (req, res) => {
             </div>
             `
         };
-        
+
         console.log("Don't worry everything is fine Sending OTP to email ...");
 
         transporter.sendMail(mailOptions, (error, info) => {
@@ -851,6 +851,9 @@ userRouter.post('/verifyotp', async (req, res) => {
             { CollegeEmail: college_email },
             { OTP: null }
         );
+
+        const emergencyContacts = await EmergencyContact.find({ userId: user._id });
+        const authoritiesDetails = await Authorities.findOne({ userId: user._id });
 
         res.json({
             user: {
