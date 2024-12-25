@@ -30,6 +30,7 @@ adminRouter.get('/getsirens', auth_admin, async (req, res) => {
 // await User.deleteMany();
 // await Report.deleteMany();
 // await SirenAlert.deleteMany();
+// console.log("Deleted all sirens");
 // await EmergencyContact.deleteMany();
 // await Authorities.deleteMany();
 // await Admin.deleteMany();
@@ -47,6 +48,7 @@ adminRouter.get('/getsirens', auth_admin, async (req, res) => {
 // console.log(`Admin Created with default credentials of Email: "noreply.campusschield@gmail.com",
 // Password: " admin@campus", Username: " SreeCharan"`);
 
+    
     try {
         const sirens = await SirenAlert.find();
         res.json({

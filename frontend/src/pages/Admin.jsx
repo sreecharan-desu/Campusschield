@@ -25,6 +25,7 @@ const AdminDashboard = () => {
   const adminData = JSON.parse(localStorage.getItem('adminData') || '{}');
   const token = localStorage.getItem('adminToken');
   const API_BASE_URL = 'https://campus-schield-backend-api.vercel.app/api/v1/admin';
+  // const API_BASE_URL = 'http://localhost:5000/api/v1/admin';
   let sirenAudio = new Audio('/siren.mp3');
 
   // Fetch Data Functions
@@ -552,7 +553,7 @@ const AdminDashboard = () => {
                         </p>
                         <p className="text-sm">
                           <span className="font-medium">userId : </span>{" "}
-                          <b style={{fontSize : "10px"}} className='text-sm text-gray'>id_{report._id}</b>
+                          <b style={{fontSize : "10px"}} className='text-sm text-gray'>id_{report.userId}</b>
                           </p>
                       </div>
                       <div className="flex justify-between pt-4">
