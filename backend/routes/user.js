@@ -10,8 +10,8 @@ const { getReports } = require('./middlewares/usermiddlewares/helperFNs/getRepor
 const validateReport = require('./middlewares/zod/reportValidation');
 const profileValidation = require('./middlewares/zod/profileValidation');
 const zod = require('zod');
-const policeEmail = 'sreecharan309@gmail.com';
-const womeEmail = 'sreecoder06@gmail.com';
+const policeEmail = 'publicpolice05@gmail.com';
+const womeEmail = 'womenorganization62@gmail.com';
 
 //routes
 userRouter.post('/signup', validateInputs, verifyUserExistence, async (req, res) => {

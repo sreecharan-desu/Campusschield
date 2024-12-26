@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
-    Edit2, Save, X, User, Phone, Mail, Book, Heart, Building,
-    UserPlus, AlertCircle, Award, Calendar, MapPin, Shield,
+    Edit2, Save, X, User, Heart, Building,
+    UserPlus, Shield,
     PhoneIcon,
     LogOutIcon
 } from 'lucide-react';
@@ -102,7 +102,7 @@ const MobileDashboard = () => {
             const data = await response.json();
 
             if (data.success) {
-                setUpdateStatus({ type: 'success', message: data.msg });
+                setUpdateStatus({ type: 'success', message: data.msg + "Please signin again for authentication.(To prove its you)"});
                                 setTimeout(()=>{
                   setUpdateStatus({ type: '', message: '' })
                 },2000)
@@ -112,7 +112,10 @@ const MobileDashboard = () => {
                 }
                 setIsEditing(false);
                 
-                if (data.msg.includes('signin again')) {
+                if (data.msg.includes('updated')) {
+                    setTimeout(()=>{
+                        setUpdateStatus({ type: 'success', message: 'Please signin again for authentication.(To prove its you)' })
+                      },2000)
                     setTimeout(() => handleLogout(), 2000);
                 }
             } else {
@@ -123,20 +126,21 @@ const MobileDashboard = () => {
             }
 
 
-            try {
-                const response = await axios.get('https://campus-schield-backend-api.vercel.app/api/v1/user/details');
-                if (response.data.success) {
-                    localStorage.setItem('user', JSON.stringify(response.data.user));
-                    navigate('/profile');
-                } else {
-                    setFormError(response.data.msg);
-                    setTimeout(() => setFormError(''), 3000);
-                }
-            } catch (error) {
-                console.log('API Error:', error);
-            } 
+            // try {
+            //     const response = await axios.get('https://campus-schield-backend-api.vercel.app/api/v1/user/details');
+            //     if (response.data.success) {
+            //         localStorage.setItem('user', JSON.stringify(response.data.user));
+            //         navigate('/');
+            //     } else {
+            //         setUpdateStatus({type : response.data.success,message : response.data.msg});
+            //         setTimeout(() => setUpdateStatus(''), 3000);
+            //     }
+            // } catch (error) {
+            //     console.log('API Error:', error);
+            // } 
      
         } catch (error) {
+            console.log(error)
             setUpdateStatus({ type: 'error', message: 'Failed to update profile' });
             setTimeout(()=>{
               setUpdateStatus({ type: '', message: '' })
@@ -647,7 +651,8 @@ const MobileDashboard = () => {
 };
 
 // StatCard Component
-const StatCard = ({ icon, label, value, bg, textColor }) => (
+// eslint-disable-next-line react/prop-types
+const StatCard = ({ label, value, bg, textColor }) => (
     <div className={`p-4 rounded-lg shadow-sm ${bg}  text-center`}>
         <div className="flex items-center justify-center">
             {/* <span className={`text-xl font-bold ${textColor}`}>{icon}</span> */}
