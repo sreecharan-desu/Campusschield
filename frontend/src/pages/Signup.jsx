@@ -79,6 +79,7 @@ const Signup = () => {
 
                 <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
                     <div className="space-y-4">
+                        <p>Username must contain 8-16 characters and Password must contain 10-12 characters</p>
                         <div className="relative">
                             <label htmlFor="username" className="text-sm font-medium text-gray-700 mb-1 block">
                                 Username
