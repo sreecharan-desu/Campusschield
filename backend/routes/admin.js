@@ -1,28 +1,28 @@
 const bcrypt = require('bcrypt');const express = require('express');const jwt = require('jsonwebtoken');
 const adminRouter = express.Router();const { Admin, User,Report, SirenAlert,EmergencyContact,Authorities } = require('../db/db');const nodemailer = require('nodemailer');
-const { validateInputs } = require('./middlewares/zod/inputValidation');const { fetchDB } = require('./middlewares/adminmiddlewares/signin-middleware');
+const { validateInputsSIgnin } = require('./middlewares/zod/inputValidation');const { fetchDB } = require('./middlewares/adminmiddlewares/signin-middleware');
 const { auth_admin } = require('./middlewares/adminmiddlewares/auth-middleware');
 const { AdminPrescence } = require('./middlewares/adminmiddlewares/signup-middleware');
 const { JWT_KEY, generate_JWT_key } = require('./middlewares/usermiddlewares/JWT/generate-auth-key');
 const mailPassword = "trlt vgrs dbyj lzdq";
 const mailId = "noreplycampusschield@gmail.com";
 
-adminRouter.post('/signup', validateInputs, AdminPrescence, async (req, res) => {
-    const { username, password } = req.body;
-    const saltRounds = 4;
-    const hashed_password = await bcrypt.hash(password, saltRounds);
+// adminRouter.post('/signup', validateInputs, AdminPrescence, async (req, res) => {
+//     const { username, password } = req.body;
+//     const saltRounds = 4;
+//     const hashed_password = await bcrypt.hash(password, saltRounds);
 
-    const admin = await Admin.create({
-        Username: username,
-        Password: hashed_password,
-        Email: mailId,
-    });
+//     const admin = await Admin.create({
+//         Username: username,
+//         Password: hashed_password,
+//         Email: mailId,
+//     });
 
-    res.json({
-        msg: `Admin account with id : ${admin._id} created succesfully..`,
-        success: true
-    });
-});
+//     res.json({
+//         msg: `Admin account with id : ${admin._id} created succesfully..`,
+//         success: true
+//     });
+// });
 
 adminRouter.get('/getsirens', auth_admin, async (req, res) => {
 
@@ -66,7 +66,7 @@ adminRouter.get('/getsirens', auth_admin, async (req, res) => {
     }
 });
 
-adminRouter.post('/signin', validateInputs, fetchDB, async(req, res) => {
+adminRouter.post('/signin', validateInputsSIgnin, fetchDB, async(req, res) => {
     const { username } = req.body;
     const token = generate_JWT_key(username);
     const admin = await Admin.findOne({ Username: username });
@@ -110,27 +110,27 @@ adminRouter.delete('/deleteuser', auth_admin, async (req, res) => {
     });
 });
 
-adminRouter.put('/update', validateInputs, auth_admin, async (req, res) => {
-    // updates the admin details
-    const authorization = req.headers.authorization;
-    const token = authorization.split(' ')[1];
-    const old_username = jwt.verify(token, JWT_KEY);
+// adminRouter.put('/update', validateInputs, auth_admin, async (req, res) => {
+//     // updates the admin details
+//     const authorization = req.headers.authorization;
+//     const token = authorization.split(' ')[1];
+//     const old_username = jwt.verify(token, JWT_KEY);
 
-    const { username, password } = req.body;
-    const hashed_password = await bcrypt.hash(password, 4);
+//     const { username, password } = req.body;
+//     const hashed_password = await bcrypt.hash(password, 4);
 
-    await Admin.updateOne({
-        Username: old_username
-    }, {
-        Username: username,
-        Password: hashed_password
-    });
+//     await Admin.updateOne({
+//         Username: old_username
+//     }, {
+//         Username: username,
+//         Password: hashed_password
+//     });
 
-    res.json({
-        msg: 'Account details updated successfully Please Signin again for authentication',
-        success: true
-    });
-});
+//     res.json({
+//         msg: 'Account details updated successfully Please Signin again for authentication',
+//         success: true
+//     });
+// });
 
 adminRouter.get('/reports', auth_admin, async (req, res) => {
     // gets all the reports

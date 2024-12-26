@@ -1,6 +1,6 @@
 const express = require('express');const userRouter = express.Router();const jwt = require('jsonwebtoken');
 const { User, Report, SirenAlert, Authorities, EmergencyContact } = require('../db/db');
-const { validateInputs } = require('./middlewares/zod/inputValidation');const nodemailer = require('nodemailer');
+const {  validateInputsSIgnup, validateInputsSIgnin } = require('./middlewares/zod/inputValidation');const nodemailer = require('nodemailer');
 const { auth_user, current_user } = require('./middlewares/usermiddlewares/auth-middleware');
 const { fecthUserDB } = require('./middlewares/usermiddlewares/signin-middleware');
 const { generate_JWT_key, JWT_KEY } = require('./middlewares/usermiddlewares/JWT/generate-auth-key');
@@ -16,7 +16,7 @@ const mailPassword = "trlt vgrs dbyj lzdq";
 const mailId = "noreplycampusschield@gmail.com";
 
 //routes
-userRouter.post('/signup', validateInputs, verifyUserExistence, async (req, res) => {
+userRouter.post('/signup', validateInputsSIgnup, verifyUserExistence, async (req, res) => {
     const { username, college_email, password } = req.body;
     try {
         const response = await generate_hashed_password(password);
@@ -68,7 +68,7 @@ userRouter.post('/signup', validateInputs, verifyUserExistence, async (req, res)
     }
 });
 
-userRouter.post('/signin', validateInputs, fecthUserDB, async (req, res) => {
+userRouter.post('/signin', validateInputsSIgnin, fecthUserDB, async (req, res) => {
     const { username } = req.body;
     try {
         const auth_token = await generate_JWT_key(username);
