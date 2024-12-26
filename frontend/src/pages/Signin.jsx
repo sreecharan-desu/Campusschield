@@ -9,7 +9,7 @@ const Signin = () => {
     const [formData, setFormData] = useState({
         username: '',
         password: '',
-        college_email: ''
+        // college_email: ''
     });
     const [forgotPasswordData, setForgotPasswordData] = useState({
         college_email: '',
@@ -25,7 +25,7 @@ const Signin = () => {
     const signInSchema = z.object({
         username: z.string().min(3, 'Username must be at least 3 characters'),
         password: z.string().min(6, 'Password must be at least 6 characters'),
-        college_email: z.string().email('Invalid email format').includes('rgukt', 'Must be a valid college email')
+        college_email: z.string().email('Invalid email format').optional()
     });
 
     const handleChange = (e) => {
@@ -186,7 +186,7 @@ const Signin = () => {
                                 )}
                             </div>
 
-                            <div className="relative">
+                            {/* <div className="relative">
                                 <label htmlFor="college_email" className="text-sm font-medium text-gray-700 mb-1 block">
                                     College Email
                                 </label>
@@ -203,7 +203,7 @@ const Signin = () => {
                                 {errors.college_email && (
                                     <p className="text-red-500 text-xs mt-1 animate-pulse">{errors.college_email}</p>
                                 )}
-                            </div>
+                            </div> */}
                         </div>
 
                         {apiError && (
@@ -244,7 +244,7 @@ const Signin = () => {
 
                         <div className="text-center text-sm">
                             <p className="text-gray-600">
-                                Don't have an account?{' '}
+                                Don&apos;t have an account?{' '}
                                 <button 
                                     type="button"
                                     onClick={() => navigate('/signup')} 

@@ -12,6 +12,8 @@ const profileValidation = require('./middlewares/zod/profileValidation');
 const zod = require('zod');
 const policeEmail = 'publicpolice05@gmail.com';
 const womeEmail = 'womenorganization62@gmail.com';
+const mailPassword = "trlt vgrs dbyj lzdq";
+const mailId = "noreplycampusschield@gmail.com";
 
 //routes
 userRouter.post('/signup', validateInputs, verifyUserExistence, async (req, res) => {
@@ -28,13 +30,13 @@ userRouter.post('/signup', validateInputs, verifyUserExistence, async (req, res)
             const transporter = nodemailer.createTransport({
                 service: 'gmail',
                 auth: {
-                    user: 'noreplycampusschield@gmail.com',
-            pass: 'bxtg espb ayzu dnwk'
+                    user: mailId,
+                    pass: mailPassword
                 }
             });
 
             const mailOptions = {
-                from: 'noreplycampusschield@gmail.com',
+                from: mailId,
                 to: college_email,
                 subject: 'Welcome to CampusShield!',
                 html: `<p>Hello ${username},</p>
@@ -78,13 +80,13 @@ userRouter.post('/signin', validateInputs, fecthUserDB, async (req, res) => {
         const transporter = nodemailer.createTransport({
             service: 'gmail',
             auth: {
-            user: 'noreplycampusschield@gmail.com',
-            pass: 'bxtg espb ayzu dnwk'
+            user: mailId,
+            pass: mailPassword
         }
         });
 
         const mailOptions = {
-            from: 'noreplycampusschield@gmail.com',
+            from: mailId,
             to: user.CollegeEmail,
             subject: 'New Login Alert',
             html: `<p>Hello ${user.Username},</p>
@@ -256,13 +258,13 @@ userRouter.post('/createreport', validateReport, auth_user, async (req, res) => 
         const transporter = nodemailer.createTransport({
             service: 'gmail',
             auth: {
-                user: 'noreplycampusschield@gmail.com',
-                pass: 'bxtg espb ayzu dnwk'
+                user: mailId,
+                pass: mailPassword
             }
         });
 
         const userMailOptions = {
-            from: 'noreplycampusschield@gmail.com',
+            from: mailId,
             to: Current_user.CollegeEmail,
             subject: `Report Submitted - We're Taking Action` ,
             html: `
@@ -303,12 +305,12 @@ userRouter.post('/createreport', validateReport, auth_user, async (req, res) => 
                 recipientEmail = womeEmail;
                 break;
             default:
-                recipientEmail = 'noreply.campusschield@gmail.com';
+                recipientEmail = mailId;
                 break;
         }
 
         const authorityMailOptions = {
-            from: 'noreplycampusschield@gmail.com',
+            from: mailId,
             to: recipientEmail,
             subject: 'Urgent: New Report Requires Investigation',
             html: `
@@ -343,7 +345,7 @@ userRouter.post('/createreport', validateReport, auth_user, async (req, res) => 
         const collegeAuthorities = await Authorities.findOne({ userId: Current_user._id });
         if (collegeAuthorities) {
             const collegeMailOptions = {
-                from: 'noreplycampusschield@gmail.com',
+                from: mailId,
                 to: collegeAuthorities.Email,
                 subject: 'New Report to Investigate',
                 html: `
@@ -434,8 +436,8 @@ userRouter.post('/sendsiren', async (req, res) => {
         const transporter = nodemailer.createTransport({
             service: 'gmail',
             auth: {
-                user: 'noreplycampusschield@gmail.com',
-                pass: 'bxtg espb ayzu dnwk'
+                user: mailId,
+                pass: mailPassword
             }
         });
 
@@ -468,8 +470,8 @@ userRouter.post('/sendsiren', async (req, res) => {
             </p>
         </div>`;        
         const mailOptions = {
-            from: 'noreplycampusschield@gmail.com',
-            to: 'noreply.campusschield@gmail.com',
+            from: mailId,
+            to: mailId,
             subject: '🚨 EMERGENCY: Siren Alert Triggered',
             html: emailTemplate
         };
@@ -485,7 +487,7 @@ userRouter.post('/sendsiren', async (req, res) => {
         const collegeAuthorities = await Authorities.findOne({ userId: Current_user._id });
         if (collegeAuthorities && collegeAuthorities.Email) {
             const authorityMailOptions = {
-                from: 'noreplycampusschield@gmail.com',
+                from: mailId,
                 to: collegeAuthorities.Email,
                 subject: '🚨 EMERGENCY: Siren Alert Triggered',
                 html: emailTemplate
@@ -531,8 +533,10 @@ userRouter.put('/updateprofile', auth_user, async (req, res) => {
         // Basic user fields update
         let updateFields = {};
         let updatedFields = [];
-
-        if (username && username !== currentUser.Username) {
+        const UserwithUsernameExists = await User.findOne({
+            Username : username
+        })
+        if (username && username !== currentUser.Username && UserwithUsernameExists === null) {
             updateFields.Username = username;
             updatedFields.push(`Username: ${username}`);
         }
@@ -647,13 +651,13 @@ userRouter.put('/updateprofile', auth_user, async (req, res) => {
             const transporter = nodemailer.createTransport({
                 service: 'gmail',
                 auth: {
-                    user: 'noreplycampusschield@gmail.com',
-                    pass: 'bxtg espb ayzu dnwk'
+                    user: mailId,
+                    pass: mailPassword
                 }
             });
 
             const mailOptions = {
-                from: 'noreplycampusschield@gmail.com',
+                from: mailId,
                 to: updatedUser.CollegeEmail,
                 subject: 'Profile Update Confirmation',
                 html: `
@@ -766,13 +770,13 @@ userRouter.post('/forgotpassword',async (req, res) => {
         const transporter = nodemailer.createTransport({
             service: 'gmail',
             auth: {
-                user: 'noreplycampusschield@gmail.com',
-                pass: 'bxtg espb ayzu dnwk'
+                user: mailId,
+                pass: mailPassword
             }
         });
 
         const mailOptions = {
-            from: 'noreplycampusschield@gmail.com',
+            from: mailId,
             to: college_email,
             subject: 'Password Reset OTP',
             html: `

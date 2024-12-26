@@ -9,6 +9,7 @@ const inputSchema = zod.object({
         .string()
         .min(10, 'Password must contain 10-12 characters')
         .max(12, 'Password must contain 10-12 characters'),
+    college_email : zod.string().email()
 });
 
 const validateInputs = async (req, res, next) => {

@@ -88,7 +88,7 @@ const MobileDashboard = () => {
             }
 
             const response = await fetch(
-                'https://campus-schield-backend-api.vercel.app/api/v1/user/updateprofile',
+                'http://localhost:5000/api/v1/user/updateprofile',
                 {
                     method: 'PUT',
                     headers: {
@@ -119,10 +119,16 @@ const MobileDashboard = () => {
                     setTimeout(() => handleLogout(), 2000);
                 }
             } else {
+                if(data.error.includes("Plan executor error during findAndModify :: caused by :: E11000 duplicate key error collection: CampusSchieldAPI.users index: CollegeEmail_1 dup key:")){
+                    setUpdateStatus({ type: 'error', message: `The email id you are trying to use has already taken by someone please use another email.`});
+                    setTimeout(()=>{
+                        setUpdateStatus({ type: '', message: '' })
+                      },2000)
+                }else{
                 setUpdateStatus({ type: 'error', message: data.msg });
                 setTimeout(()=>{
                   setUpdateStatus({ type: '', message: '' })
-                },2000)
+                },2000)}
             }
 
 

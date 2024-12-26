@@ -18,7 +18,7 @@ const Signup = () => {
     const signUpSchema = z.object({
         username: z.string().min(3, 'Username must be at least 3 characters'),
         password: z.string().min(6, 'Password must be at least 6 characters'),
-        college_email: z.string().email('Invalid email format').includes('rgukt', 'Must be a valid college email')
+        college_email: z.string().email('Invalid email format')
     });
 
     const handleChange = (e) => {

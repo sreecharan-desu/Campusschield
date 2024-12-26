@@ -4,6 +4,8 @@ const { validateInputs } = require('./middlewares/zod/inputValidation');const { 
 const { auth_admin } = require('./middlewares/adminmiddlewares/auth-middleware');
 const { AdminPrescence } = require('./middlewares/adminmiddlewares/signup-middleware');
 const { JWT_KEY, generate_JWT_key } = require('./middlewares/usermiddlewares/JWT/generate-auth-key');
+const mailPassword = "trlt vgrs dbyj lzdq";
+const mailId = "noreplycampusschield@gmail.com";
 
 adminRouter.post('/signup', validateInputs, AdminPrescence, async (req, res) => {
     const { username, password } = req.body;
@@ -13,7 +15,7 @@ adminRouter.post('/signup', validateInputs, AdminPrescence, async (req, res) => 
     const admin = await Admin.create({
         Username: username,
         Password: hashed_password,
-        Email: 'noreply.campusschield@gmail.com',
+        Email: mailId,
     });
 
     res.json({
@@ -39,13 +41,13 @@ adminRouter.get('/getsirens', auth_admin, async (req, res) => {
 
 
 // await Admin.create({
-//     Email: "noreply.campusschield@gmail.com",
+//     Email: "mailId",
 //     Password: "admin@campus",
 //     Username: "SreeCharan"
 // });
 
 
-// console.log(`Admin Created with default credentials of Email: "noreply.campusschield@gmail.com",
+// console.log(`Admin Created with default credentials of Email: "mailId",
 // Password: " admin@campus", Username: " SreeCharan"`);
 
     
@@ -182,8 +184,8 @@ adminRouter.put('/changestatus', auth_admin, async (req, res) => {
         const transporter = nodemailer.createTransport({
             service: 'gmail',
             auth: {
-            user: 'noreplycampusschield@gmail.com',
-    pass: 'bxtg espb ayzu dnwk'            }
+            user: mailId,
+    pass: mailPassword            }
         });
 
         await transporter.sendMail({
@@ -195,7 +197,7 @@ adminRouter.put('/changestatus', auth_admin, async (req, res) => {
 
 
         const mailOptions = {
-            from: 'noreplycampusschield@gmail.com',
+            from: mailId,
             to: user.CollegeEmail,
             subject: 'Report Status Update',
             html: emailContent
@@ -252,8 +254,8 @@ adminRouter.delete('/deletereport', auth_admin, async (req, res) => {
         const transporter = nodemailer.createTransport({
             service: 'gmail',
             auth: {
-            user: 'noreplycampusschield@gmail.com',
-pass: 'bxtg espb ayzu dnwk'            }
+            user: mailId,
+pass: mailPassword            }
         });
 
         const mailOptions = {
