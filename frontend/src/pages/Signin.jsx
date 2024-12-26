@@ -261,7 +261,7 @@ const Signin = () => {
                         <div className="space-y-4">
                             <div className="relative">
                                 <label htmlFor="forgot_college_email" className="text-sm font-medium text-gray-700 mb-1 block">
-                                    College Email
+                                    Your Email
                                 </label>
                                 <input
                                     id="forgot_college_email"
