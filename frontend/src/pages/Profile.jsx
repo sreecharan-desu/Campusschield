@@ -88,7 +88,7 @@ const MobileDashboard = () => {
             }
 
             const response = await fetch(
-                'https://campus-schield-backend-api.vercel.app/api/v1/user/updateprofile',
+                'http://localhost:5000/api/v1/user/updateprofile',
                 {
                     method: 'PUT',
                     headers: {
@@ -230,14 +230,23 @@ const MobileDashboard = () => {
 
                 </div>
                 <div className="flex gap-2">
-                    {!isEditing ? (
-                        <button
-                            onClick={() => setIsEditing(true)}
-                            className="bg-white text-indigo-500 p-2 rounded-full hover:bg-indigo-50 transition-colors"
-                        >
-                            <Edit2 size={20} />
-                        </button>
-                    ) : (
+                    {!isEditing ? (<>
+    <div className="flex flex-col items-center space-y-4 p-4 sm:space-y-6 sm:p-6">
+        <button
+            onClick={() => setIsEditing(true)}
+            className="bg-gradient-to-r from-indigo-500 to-purple-500 text-white p-4 rounded-full shadow-lg hover:scale-105 hover:shadow-xl transition-transform duration-200 sm:p-5 sm:text-lg"
+            aria-label="Edit profile"
+            title="Edit your profile"
+        >
+            <Edit2 size={28} className="sm:w-8 sm:h-8" />
+        </button>
+        <p className="text-xs text-gray-600 bg-gray-100 p-3 rounded-lg shadow-md border border-gray-200 max-w-xs text-center sm:text-sm sm:max-w-md sm:p-4">
+            <strong>Note:</strong> On updating your profile, you need to sign in again for authentication.
+        </p>
+    </div>
+</>
+
+) : (
                         <div className="flex gap-2">
                             <button
                                 onClick={handleUpdateProfile}
@@ -288,7 +297,7 @@ const MobileDashboard = () => {
                             />
                         ) : (
                             <p className="text-gray-800 p-2 bg-gray-50 rounded-lg">
-                                {userData[field.key] || 'Not specified'}
+                                {userData[field.key] || '-'}
                             </p>
                         )}
                     </div>
@@ -612,7 +621,7 @@ const MobileDashboard = () => {
                     'College Information',
                     <Building size={20} className="text-blue-500" />,
                     [
-                        { label: 'College Name', key: 'college_name', type: 'text' },
+                        { label: 'College Name', key: 'college', type: 'text' },
                         { label: 'Course', key: 'course', type: 'text' },
                         { label: 'Year', key: 'year', type: 'text' },
                     ],

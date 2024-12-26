@@ -517,7 +517,7 @@ userRouter.put('/updateprofile', auth_user, async (req, res) => {
         const {
             username, password, personal_email, college_email, phone, address,
             college_name, course, year, blood_group, medical_conditions,
-            allergies, medications, emergency_contacts, authorities_details
+            allergies, medications, emergency_contacts, authorities_detail
         } = req.body;
 
         const authorization = req.headers.authorization;
@@ -599,17 +599,18 @@ userRouter.put('/updateprofile', auth_user, async (req, res) => {
             updatedFields.push('Emergency Contacts Updated');
         }
 
+        console.log()
         // Update authorities if provided
-        if (authorities_details) {
-            await Authorities.findOneAndUpdate(
+        if (authorities_detail) {
+            await Authorities.updateOne(
                 { userId: currentUser._id },
                 {
                     userId: currentUser._id,
-                    Name: authorities_details.name,
-                    Phone: authorities_details.phone,
-                    Address: authorities_details.address,
-                    Email: authorities_details.email,
-                    Type: authorities_details.type
+                    Name: authorities_detail.name,
+                    Phone: authorities_detail.phone,
+                    Address: authorities_detail.address,
+                    Email: authorities_detail.email,
+                    Type: authorities_detail.type
                 },
                 { upsert: true, new: true }
             );
@@ -717,7 +718,7 @@ userRouter.put('/updateprofile', auth_user, async (req, res) => {
                     medical_conditions: updatedUser.MedicalConditions,
                     allergies: updatedUser.Allergies,
                     medications: updatedUser.Medications,
-                    authorities_details: authoritiesDetails,
+                    authorities_detail: authoritiesDetails,
                     emergency_contacts: emergencyContacts
                 }
             });
