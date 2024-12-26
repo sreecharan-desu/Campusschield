@@ -56,4 +56,5 @@ CampusShield-Backend is a backend service for managing campus security operation
 This project is licensed under the MIT License.
 
 ## Contact
-For any inquiries, please contact [your-email@example.com].
+For any inquiries, please contact.
+sreecharan309@gmail.com
