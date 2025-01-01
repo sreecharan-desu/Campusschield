@@ -15,7 +15,7 @@ app.use("/api/v1/", mainRouter);
 
 async function startServer() {
     try {
-        await SirenAlert.deleteMany();
+        // await SirenAlert.deleteMany();
         app.listen(5000, () => {
             console.log("Listening on port 5000....");
         });
