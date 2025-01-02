@@ -322,147 +322,84 @@ const Homepage = () => {
       {
         !isAuth ? <>
 
-<div className="flex flex-col items-center justify-center min-h-[80vh] text-center px-4">
-      {/* Hero Section */}
+<div className="flex flex-col items-center justify-center min-h-[80vh] text-center px-6">
+  {/* Hero Section */}
+  <div className="m-8">
+    <img src='/image1.webp' alt="CampusShield Hero" className="w-full h-auto rounded-xl shadow-lg" />
+  </div>
+  <p className="text-gray-600 mb-8 mt-8 italic font-semibold text-lg max-w-3xl mx-auto">
+    CampusShield is your companion for a secure and informed campus life. 
+    Easily report incidents, stay updated on safety issues, and access 
+    essential resources — all in one place.
+  </p>
 
-      <p className="text-gray-600 mb-8 mt-8 italic bold">
-        CampusShield is your companion for a secure and informed campus life. 
-        Easily report incidents, stay updated on safety issues, and access 
-        essential resources — all in one place.
-      </p>
-
-      {/* Features Section */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl ">
-        <div className="flex flex-col items-center">
-          <div className="w-24 h-24 mb-4">
-          <svg
-  xmlns="http://www.w3.org/2000/svg"
-  viewBox="0 0 64 64"
-  className="animate-bounce"
-  width="100%"
-  height="100%"
->
-  <rect x="10" y="5" width="44" height="54" rx="4" fill="#f3f4f6" stroke="#d1d5db" strokeWidth="2" />
-  
-  <rect x="16" y="12" width="32" height="4" fill="#6b7280" />
-  
-  <rect x="16" y="20" width="28" height="3" fill="#9ca3af" />
-  <rect x="16" y="26" width="20" height="3" fill="#9ca3af" />
-  <rect x="16" y="32" width="24" height="3" fill="#9ca3af" />
-  
-  <path
-    d="M42 42L54 54L47 61L35 49Z"
-    fill="#f59e0b"
-    stroke="#d97706"
-    strokeWidth="2"
-  />
-  <path
-    d="M54 54L57 57"
-    stroke="#9ca3af"
-    strokeWidth="2"
-    strokeLinecap="round"
-  />
-  <path
-    d="M35 49L42 42"
-    stroke="#f59e0b"
-    strokeWidth="2"
-    strokeLinecap="round"
-  />
-</svg>
-
-          </div>
-          <h3 className="text-lg font-semibold text-indigo-600 mb-2 italic bold">
-            Report Incidents
-          </h3>
-          <p className="text-sm text-gray-600 italic bold">
-            Quickly report incidents and ensure campus safety with ease.
-          </p>
-        </div>
-        <div className="flex flex-col items-center">
-          <div className="w-24 h-24 mb-4">
-          <svg
-  xmlns="http://www.w3.org/2000/svg"
-  viewBox="0 0 64 64"
-  className="animate-pulse"
-  width="100%"
-  height="100%"
->
-  <path
-    d="M32 8C23.2 8 16 15.2 16 24V38H12C10.8 38 10 38.8 10 40C10 41.2 10.8 42 12 42H20C20 46.4 24.6 50 32 50C39.4 50 44 46.4 44 42H52C53.2 42 54 41.2 54 40C54 38.8 53.2 38 52 38H48V24C48 15.2 40.8 8 32 8Z"
-    fill="#fbbf24"
-    stroke="#f59e0b"
-    strokeWidth="2"
-  />
-  
-  <circle cx="32" cy="52" r="4" fill="#f59e0b" />
-  
-  <circle cx="46" cy="18" r="5" fill="#ef4444" />
-  
-  <path
-    d="M24 38H40V24C40 16.8 34.2 12 32 12C29.8 12 24 16.8 24 24V38Z"
-    fill="rgba(255, 255, 255, 0.3)"
-  />
-</svg>
-
-          </div>
-          <h3 className="text-lg font-semibold text-indigo-600 mb-2 italic bold">
-            Real-Time Updates
-          </h3>
-          <p className="text-sm text-gray-600 italic bold">
-            Get real-time updates on campus events and safety alerts.
-          </p>
-        </div>
-        <div className="flex flex-col items-center">
-          <div className="w-24 h-24 mb-4">
-          <svg
-  xmlns="http://www.w3.org/2000/svg"
-  viewBox="0 0 64 64"
-  width="100%"
-  height="100%"
->
-  <path
-    d="M12 8H44C48.4 8 52 11.6 52 16V48C52 52.4 48.4 56 44 56H12C9.8 56 8 54.2 8 52V12C8 9.8 9.8 8 12 8Z"
-    fill="#60a5fa"
-    stroke="#3b82f6"
-    strokeWidth="2"
-  />
-  
-  <path
-    d="M16 12H40V48H16C14.8 48 14 47.2 14 46V14C14 12.8 14.8 12 16 12Z"
-    fill="#ffffff"
-  />
-  
-  <path
-    d="M28 12H40V24L34 20L28 24V12Z"
-    fill="#f59e0b"
-    stroke="#d97706"
-    strokeWidth="1.5"
-  />
-  
-  <path
-    d="M44 56H12C9.8 56 8 54.2 8 52C10.2 54.2 12.6 54 12.6 54H44C46.2 54 48 52.2 48 50V48C48 50.2 46.4 56 44 56Z"
-    fill="rgba(0, 0, 0, 0.1)"
-  />
-</svg>
-
-          </div>
-          <h3 className="text-lg font-semibold text-indigo-600 mb-2 italic bold">
-            Access Resources
-          </h3>
-          <p className="text-sm text-gray-600 italic bold">
-            Find essential resources and contacts at your fingertips.
-          </p>
-        </div>
+  {/* Features Section */}
+  <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+    <div className="flex flex-col items-center p-6 bg-white rounded-lg shadow-lg hover:scale-105 transform transition-all duration-300">
+      <div className="w-24 h-24 mb-4">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" className="animate-bounce" width="100%" height="100%">
+          <rect x="10" y="5" width="44" height="54" rx="4" fill="#f3f4f6" stroke="#d1d5db" strokeWidth="2" />
+          <rect x="16" y="12" width="32" height="4" fill="#6b7280" />
+          <rect x="16" y="20" width="28" height="3" fill="#9ca3af" />
+          <rect x="16" y="26" width="20" height="3" fill="#9ca3af" />
+          <rect x="16" y="32" width="24" height="3" fill="#9ca3af" />
+          <path d="M42 42L54 54L47 61L35 49Z" fill="#f59e0b" stroke="#d97706" strokeWidth="2" />
+          <path d="M54 54L57 57" stroke="#9ca3af" strokeWidth="2" strokeLinecap="round" />
+          <path d="M35 49L42 42" stroke="#f59e0b" strokeWidth="2" strokeLinecap="round" />
+        </svg>
       </div>
-
-      {/* Call to Action */}
-      <button
-        onClick={() => navigate('/signin')}
-        className="mt-8  bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-lg text-lg font-semibold shadow-md transform hover:scale-105 transition-transform"
-      >
-        Sign In to Get Started
-      </button>
+      <h3 className="text-lg font-semibold text-indigo-600 mb-2 italic">
+        Report Incidents
+      </h3>
+      <p className="text-sm text-gray-600 italic">
+        Quickly report incidents and ensure campus safety with ease.
+      </p>
     </div>
+
+    <div className="flex flex-col items-center p-6 bg-white rounded-lg shadow-lg hover:scale-105 transform transition-all duration-300">
+      <div className="w-24 h-24 mb-4">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" className="animate-pulse" width="100%" height="100%">
+          <path d="M32 8C23.2 8 16 15.2 16 24V38H12C10.8 38 10 38.8 10 40C10 41.2 10.8 42 12 42H20C20 46.4 24.6 50 32 50C39.4 50 44 46.4 44 42H52C53.2 42 54 41.2 54 40C54 38.8 53.2 38 52 38H48V24C48 15.2 40.8 8 32 8Z" fill="#fbbf24" stroke="#f59e0b" strokeWidth="2" />
+          <circle cx="32" cy="52" r="4" fill="#f59e0b" />
+          <circle cx="46" cy="18" r="5" fill="#ef4444" />
+          <path d="M24 38H40V24C40 16.8 34.2 12 32 12C29.8 12 24 16.8 24 24V38Z" fill="rgba(255, 255, 255, 0.3)" />
+        </svg>
+      </div>
+      <h3 className="text-lg font-semibold text-indigo-600 mb-2 italic">
+        Real-Time Updates
+      </h3>
+      <p className="text-sm text-gray-600 italic">
+        Get real-time updates on campus events and safety alerts.
+      </p>
+    </div>
+
+    <div className="flex flex-col items-center p-6 bg-white rounded-lg shadow-lg hover:scale-105 transform transition-all duration-300">
+      <div className="w-24 h-24 mb-4">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="100%" height="100%">
+          <path d="M12 8H44C48.4 8 52 11.6 52 16V48C52 52.4 48.4 56 44 56H12C9.8 56 8 54.2 8 52V12C8 9.8 9.8 8 12 8Z" fill="#60a5fa" stroke="#3b82f6" strokeWidth="2" />
+          <path d="M16 12H40V48H16C14.8 48 14 47.2 14 46V14C14 12.8 14.8 12 16 12Z" fill="#ffffff" />
+          <path d="M28 12H40V24L34 20L28 24V12Z" fill="#f59e0b" stroke="#d97706" strokeWidth="1.5" />
+          <path d="M44 56H12C9.8 56 8 54.2 8 52C10.2 54.2 12.6 54 12.6 54H44C46.2 54 48 52.2 48 50V48C48 50.2 46.4 56 44 56Z" fill="rgba(0, 0, 0, 0.1)" />
+        </svg>
+      </div>
+      <h3 className="text-lg font-semibold text-indigo-600 mb-2 italic">
+        Access Resources
+      </h3>
+      <p className="text-sm text-gray-600 italic">
+        Find essential resources and contacts at your fingertips.
+      </p>
+    </div>
+  </div>
+
+  {/* Call to Action */}
+  <button
+    onClick={() => navigate('/signin')}
+    className="mt-8 bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-lg text-lg font-semibold shadow-md transform hover:scale-105 transition-all duration-300"
+  >
+    Sign In to Get Started
+  </button>
+</div>
+
         
         </> : <>
         
@@ -513,6 +450,7 @@ const Homepage = () => {
       </div>
     </>
   );
+
 };
 
 
