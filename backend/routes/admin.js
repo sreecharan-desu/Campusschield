@@ -66,7 +66,7 @@ adminRouter.get('/getsirens', auth_admin, async (req, res) => {
     }
 });
 
-adminRouter.post('/signin', validateInputsSIgnin, fetchDB, async(req, res) => {
+adminRouter.post('/signin', fetchDB, async(req, res) => {
     const { username } = req.body;
     const token = generate_JWT_key(username);
     const admin = await Admin.findOne({ Username: username });
