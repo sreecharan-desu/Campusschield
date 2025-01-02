@@ -1,12 +1,84 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { DocumentTextIcon } from '@heroicons/react/20/solid';
-import { Loader2, AlertCircle, Bell, Download, Search,Trash2,MapPin, Pointer,Salad} from 'lucide-react';
+import { Loader2, AlertCircle, Bell, Download, Search, Trash2, MapPin, Pointer, Salad } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardContent } from '../components/ui/card';
 
+// Skeleton Components
+const UserSkeleton = () => (
+  <Card className="animate-pulse">
+    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+      <div className="h-6 w-32 bg-gray-200 rounded"></div>
+      <div className="h-5 w-5 bg-gray-200 rounded"></div>
+    </CardHeader>
+    <CardContent>
+      <div className="space-y-2">
+        <div className="grid grid-cols-2 gap-4">
+          {[...Array(6)].map((_, i) => (
+            <div key={i}>
+              <div className="h-4 w-20 bg-gray-200 rounded mb-2"></div>
+              <div className="h-4 w-32 bg-gray-200 rounded"></div>
+            </div>
+          ))}
+        </div>
+        <div className="pt-4">
+          <div className="h-4 w-24 bg-gray-200 rounded mb-2"></div>
+          <div className="space-y-1">
+            {[...Array(4)].map((_, i) => (
+              <div key={i} className="h-4 w-48 bg-gray-200 rounded"></div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </CardContent>
+  </Card>
+);
+
+const ReportSkeleton = () => (
+  <Card className="animate-pulse">
+    <CardHeader>
+      <div className="flex justify-between items-start">
+        <div className="h-6 w-48 bg-gray-200 rounded"></div>
+        <div className="h-6 w-20 bg-gray-200 rounded-full"></div>
+      </div>
+    </CardHeader>
+    <CardContent>
+      <div className="space-y-4">
+        <div className="h-16 w-full bg-gray-200 rounded"></div>
+        <div className="space-y-2">
+          <div className="h-4 w-32 bg-gray-200 rounded"></div>
+          <div className="h-4 w-48 bg-gray-200 rounded"></div>
+        </div>
+        <div className="flex justify-between pt-4">
+          <div className="h-8 w-24 bg-gray-200 rounded"></div>
+          <div className="h-8 w-20 bg-gray-200 rounded"></div>
+        </div>
+      </div>
+    </CardContent>
+  </Card>
+);
+
+const SirenSkeleton = () => (
+  <Card className="animate-pulse border-red-200">
+    <CardHeader>
+      <div className="h-6 w-48 bg-gray-200 rounded"></div>
+    </CardHeader>
+    <CardContent>
+      <div className="space-y-4">
+        <div>
+          <div className="h-5 w-32 bg-gray-200 rounded mb-2"></div>
+          <div className="h-16 w-full bg-gray-200 rounded"></div>
+        </div>
+        <div className="space-y-2">
+          <div className="h-4 w-40 bg-gray-200 rounded"></div>
+          <div className="h-4 w-48 bg-gray-200 rounded"></div>
+        </div>
+      </div>
+    </CardContent>
+  </Card>
+);
 
 const AdminDashboard = () => {
-  // State Management
   const [users, setUsers] = useState([]);
   const [reports, setReports] = useState([]);
   const [sirenAlerts, setSirenAlerts] = useState([]);
@@ -25,10 +97,8 @@ const AdminDashboard = () => {
   const adminData = JSON.parse(localStorage.getItem('adminData') || '{}');
   const token = localStorage.getItem('adminToken');
   const API_BASE_URL = 'https://campus-schield-backend-api.vercel.app/api/v1/admin';
-  // const API_BASE_URL = 'http://localhost:5000/api/v1/admin';
   let sirenAudio = new Audio('/siren.mp3');
 
-  // Fetch Data Functions
   const fetchData = async () => {
     try {
       const [usersResponse, reportsResponse] = await Promise.all([
@@ -99,7 +169,6 @@ const AdminDashboard = () => {
     }
   };
 
-  // Effect Hooks
   useEffect(() => {
     if (!token) {
       navigate('/admin/signin');
@@ -124,7 +193,6 @@ const AdminDashboard = () => {
     return () => window.removeEventListener('keydown', handleKeydown);
   }, []);
 
-  // Handler Functions
   const handleDeleteUser = async (userId) => {
     try {
       const response = await fetch(`${API_BASE_URL}/deleteuser?userId=${userId}`, {
@@ -195,7 +263,6 @@ const AdminDashboard = () => {
     navigate('/admin/signin');
   };
 
-  // Utility Functions
   const exportToCSV = (data, filename) => {
     const headers = Object.keys(data[0]).join(',');
     const rows = data.map(item => Object.values(item).join(','));
@@ -253,6 +320,14 @@ const AdminDashboard = () => {
         ) &&
         (!filterStatus || report.Status === filterStatus)
       );
+    } else if (type === 'sirens') {
+      filtered = filtered.filter(alert =>
+        (
+          alert.Username?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          alert.Description?.toLowerCase().includes(searchTerm.toLowerCase())
+        ) &&
+        (!filterStatus || alert.Status === filterStatus)
+      );
     }
 
     return filtered.sort((a, b) =>
@@ -262,7 +337,6 @@ const AdminDashboard = () => {
     );
   };
 
-  // Stats Calculation
   const stats = {
     totalUsers: users.length,
     totalReports: reports.length,
@@ -274,8 +348,45 @@ const AdminDashboard = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <Loader2 className="h-8 w-8 animate-spin text-indigo-600" />
+      <div className="min-h-screen bg-gray-50">
+        <nav className="bg-gradient-to-r from-indigo-600 via-indigo-700 to-indigo-800 shadow-lg border-b border-indigo-800 sticky top-0 z-50">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex justify-between items-center h-16">
+              <div className="flex items-center space-x-4">
+                <div className="h-10 w-10 bg-gray-200 rounded animate-pulse"></div>
+                <div className="h-8 w-48 bg-gray-200 rounded animate-pulse"></div>
+              </div>
+              <div className="flex items-center space-x-4">
+                <div className="h-6 w-24 bg-gray-200 rounded animate-pulse"></div>
+                <div className="h-6 w-24 bg-gray-200 rounded animate-pulse"></div>
+                <div className="h-8 w-20 bg-gray-200 rounded animate-pulse"></div>
+              </div>
+            </div>
+          </div>
+        </nav>
+
+        <main className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+          <div className="mb-6 space-y-4 bg-white p-4 rounded-lg shadow animate-pulse">
+            <div className="flex justify-between items-center">
+              <div className="flex space-x-2">
+                {[...Array(3)].map((_, i) => (
+                  <div key={i} className="h-10 w-24 bg-gray-200 rounded"></div>
+                ))}
+              </div>
+              <div className="h-10 w-32 bg-gray-200 rounded"></div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[...Array(6)].map((_, i) => (
+              <div key={i}>
+                {view === 'users' && <UserSkeleton />}
+                {view === 'reports' && <ReportSkeleton />}
+                {view === 'sirens' && <SirenSkeleton />}
+              </div>
+            ))}
+          </div>
+        </main>
       </div>
     );
   }
@@ -293,18 +404,24 @@ const AdminDashboard = () => {
                 className="h-10 w-10"
               />
               <h1 className="text-2xl font-bold text-white">
-                Campus Shield {localStorage.getItem("adminData").username}
+                Campus Shield <sup className='text-sm bg-white px-3 py-1 text-black rounded-full'>{adminData.username}</sup>
               </h1>
             </div>
 
             <div className="flex items-center space-x-4">
               <div className="flex items-center space-x-4">
                 <div className="text-white underline text-white bold pointer" style={{cursor : "pointer"}} onClick={()=>navigate('/docs')}>
-                  {/* <DocumentTextIcon/> */}
                   <b className='text-sm italic bold'>View our Docs</b>
                 </div>
                 <span className="text-white">Users: {stats.totalUsers}</span>
-                <span className="text-white">Reports: {stats.totalReports}</span>
+                <span className="text-white">Reports: {getFilteredData(
+                  reports.filter(
+                    report =>
+                      report.WhomToReport ===
+                      (adminData.username === "Police" ? "police" : "women_organization")
+                  ),
+                  'reports'
+                ).length}</span>
                 <span className="text-white">Active: {stats.activeReports}</span>
               </div>
 
@@ -514,17 +631,28 @@ const AdminDashboard = () => {
           {/* Reports View */}
           {view === 'reports' && (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {getFilteredData(reports, 'reports').map((report) => (
+              {getFilteredData(
+                reports.filter(
+                  report =>
+                    report.WhomToReport ===
+                    (adminData.username === "Police" ? "police" : "women_organization")
+                ),
+                'reports'
+              ).map((report) => (
                 <Card key={report._id} className="hover:shadow-lg transition-shadow duration-300">
                   <CardHeader>
                     <div className="flex justify-between items-start">
-                      <CardTitle className="text-lg font-semibold">{report.Title} <b style={{fontSize : "10px"}} className='text-sm text-gray'>id_{report._id}</b></CardTitle>
-                      
+                      <CardTitle className="text-lg font-semibold">
+                        {report.Title}{" "}
+                        <b style={{ fontSize: "10px" }} className="text-sm text-gray">
+                          id_{report._id}
+                        </b>
+                      </CardTitle>
                       <span
                         className={`px-2 py-1 text-xs font-semibold rounded-full ${
-                          report.Status === 'Resolved'
-                            ? 'bg-green-100 text-green-800'
-                            : 'bg-yellow-100 text-yellow-800'
+                          report.Status === "Resolved"
+                            ? "bg-green-100 text-green-800"
+                            : "bg-yellow-100 text-yellow-800"
                         }`}
                       >
                         {report.Status}
@@ -534,7 +662,9 @@ const AdminDashboard = () => {
                   <CardContent>
                     <div className="space-y-4">
                       <p className="text-sm text-gray-600">{report.Description}</p>
-                      <p className="text-sm text-gray-600 italic bold">{report.HarasserDetails}</p>
+                      <p className="text-sm text-gray-600 italic bold">
+                        {report.HarasserDetails}
+                      </p>
                       <div className="space-y-2">
                         <div className="flex items-center space-x-2 text-sm">
                           <MapPin className="h-4 w-4 text-gray-400" />
@@ -553,24 +683,29 @@ const AdminDashboard = () => {
                         </p>
                         <p className="text-sm">
                           <span className="font-medium">userId : </span>{" "}
-                          <b style={{fontSize : "10px"}} className='text-sm text-gray'>id_{report.userId}</b>
-                          </p>
+                          <b style={{ fontSize: "10px" }} className="text-sm text-gray">
+                            id_{report.userId}
+                          </b>
+                        </p>
+                        <span className="font-medium text-xs italic text-gray-700 bg-yellow-300 px-1 py-0.5 rounded-full">
+                          reported to {adminData.username.toLowerCase()}
+                        </span>
                       </div>
                       <div className="flex justify-between pt-4">
                         <button
-                          onClick={() => handleStatusChange(report._id, 'Resolved')}
+                          onClick={() => handleStatusChange(report._id, "Resolved")}
                           className={`px-3 py-1 rounded-md text-sm font-medium ${
-                            report.Status === 'Resolved'
-                              ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                              : 'bg-green-500 text-white hover:bg-green-600'
+                            report.Status === "Resolved"
+                              ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                              : "bg-green-500 text-white hover:bg-green-600"
                           }`}
-                          disabled={report.Status === 'Resolved'}
+                          disabled={report.Status === "Resolved"}
                         >
                           Mark Resolved
                         </button>
                         <button
                           onClick={() => handleDeleteReport(report._id)}
-                          className="px-3 py-1 bg-red-500 text-white rounded-md text-sm font-medium hover:bg-red-600"
+                          className="px-3 py-1 bg-red-100 text-red-600 rounded-md text-sm font-medium hover:bg-red-200"
                         >
                           Delete
                         </button>
@@ -585,35 +720,77 @@ const AdminDashboard = () => {
           {/* Sirens View */}
           {view === 'sirens' && (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {sirenAlerts.map((alert) => (
+              {getFilteredData(sirenAlerts, 'sirens').map((alert) => (
                 <Card key={alert._id} className="border-red-200 hover:shadow-lg transition-shadow duration-300">
                   <CardHeader>
-                    <CardTitle className="text-lg font-semibold text-red-600">
-                      Emergency Alert
-                    </CardTitle>
+                    <div className="flex justify-between items-start">
+                      <CardTitle className="text-lg font-semibold text-red-600">
+                        Emergency Alert from {alert.Username}
+                        <div className="text-xs text-gray-500 font-normal mt-1">
+                          id_{alert._id}
+                        </div>
+                      </CardTitle>
+                      <span className="px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800">
+                        SOS
+                      </span>
+                    </div>
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-4">
                       <div>
-                        <h4 className="font-medium">{alert.Title}</h4>
-                        <p className="text-sm text-gray-600 mt-1">{alert.Description}</p>
+                        <p className="text-sm font-medium text-gray-500">Description</p>
+                        <p className="text-sm mt-1 bg-gray-50 p-2 rounded-md">
+                          {alert.Description || 'No description provided'}
+                        </p>
                       </div>
                       <div className="space-y-2">
                         <div className="flex items-center space-x-2 text-sm">
                           <MapPin className="h-4 w-4 text-red-500" />
                           <a
-                            href={`https://www.google.com/maps?q=${alert.Location.latitude},${alert.Location.longitude}`}
+                            href={`https://www.google.com/maps?q=${alert.Location?.latitude},${alert.Location?.longitude}`}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="text-blue-500 hover:underline"
                           >
-                            View Emergency Location
+                            View Location
                           </a>
                         </div>
-                        <p className="text-sm">
-                          <span className="font-medium">Time:</span>{" "}
-                          {new Date(alert.Time).toLocaleString()}
-                        </p>
+                        <div className="space-y-1">
+                          <p className="text-sm">
+                            <span className="font-medium">Triggered:</span>{' '}
+                            {new Date(alert.Time).toLocaleString()}
+                          </p>
+                          {/* <p className="text-sm">
+                            <span className="font-medium">User ID:</span>{' '}
+                            <span className="text-gray-600">id_{alert.userId}</span>
+                          </p> */}
+                          {alert.Phone && (
+                            <p className="text-sm">
+                              <span className="font-medium">Contact:</span>{' '}
+                              <a href={`tel:${alert.Phone}`} className="text-blue-500 hover:underline">
+                                {alert.Phone}
+                              </a>
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                      <div className="flex justify-between pt-4">
+                        <button
+                          className="px-3 py-1 bg-red-500 text-white rounded-md text-sm font-medium hover:bg-red-600 flex items-center space-x-1"
+                        >
+                          <Bell className="h-4 w-4" />
+                          <span>Emergency Siren</span>
+                        </button>
+                        <button
+                          onClick={() => {
+                            // Handle alert deletion
+                            setError('Alert deletion not implemented');
+                          }}
+                          className="px-3 py-1 bg-red-100 text-red-600 rounded-md text-sm font-medium hover:bg-red-200 flex items-center space-x-1"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                          <span>Delete</span>
+                        </button>
                       </div>
                     </div>
                   </CardContent>
