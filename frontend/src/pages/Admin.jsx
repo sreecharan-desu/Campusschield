@@ -293,7 +293,7 @@ const AdminDashboard = () => {
                 className="h-10 w-10"
               />
               <h1 className="text-2xl font-bold text-white">
-                Campus Shield Admin
+                Campus Shield {localStorage.getItem("adminData").username}
               </h1>
             </div>
 
