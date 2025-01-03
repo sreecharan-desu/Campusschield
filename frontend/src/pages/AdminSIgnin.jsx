@@ -1,14 +1,19 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useSetRecoilState } from 'recoil';
 import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import { adminTokenState, adminDataState } from '../store';
 
 const AdminSignIn = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const [showPassword, setShowPassword] = useState(false); // State for toggling password visibility
+  const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
+  
+  // Recoil setters
+  const setAdminToken = useSetRecoilState(adminTokenState);
+  const setAdminData = useSetRecoilState(adminDataState);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -26,8 +31,10 @@ const AdminSignIn = () => {
       const data = await response.json();
 
       if (data.success) {
-        localStorage.setItem('adminToken', data.token);
-        localStorage.setItem('adminData', JSON.stringify(data.admin));
+        // Update Recoil state instead of localStorage
+        // setAdminToken(data.token);
+        localStorage.setItem("adminToken",data.token);
+        setAdminData(data.admin);
         toast.success('Signed in successfully!', { position: 'top-right' });
         navigate('/admin/dashboard');
       } else {

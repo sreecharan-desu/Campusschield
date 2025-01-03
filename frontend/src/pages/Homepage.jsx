@@ -2,8 +2,11 @@ import React, { useEffect, useRef, useState } from 'react';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import BottomNavbar from '../components/BottomNavbar';
-import { FaMapMarkerAlt, FaUser, FaClock, FaFlag } from 'react-icons/fa';
-import { motion, AnimatePresence } from "framer-motion";
+import { 
+  User, Flag, Clock, MapPin, AlertCircle, 
+  CheckCircle2, CircleDot, Circle,Badge,Video,Calendar,FileText,ChevronDown,ChevronUp
+} from 'lucide-react';import { motion, AnimatePresence } from "framer-motion";
+import {Card,CardHeader,CardTitle,CardContent} from '../components/ui/card';
 
 const SirenButton = () => {
   const [showPopup, setShowPopup] = useState(false);
@@ -245,8 +248,10 @@ const Homepage = () => {
       if (currentHour < 18) return "Good Afternoon";
       return "Good Evening";
     };
-
     fetchReports();
+    setInterval(()=>{
+      fetchReports()
+    },5000);
     setGreeting(determineGreeting());
   }, []);
 
@@ -457,90 +462,133 @@ const Homepage = () => {
 export default Homepage;
 
 
+// import { 
+//   MapPin, Clock, User, AlertCircle, FileText, 
+//   Video, Image, Audio, ChevronDown, ChevronUp,
+//   Flag, Calendar
+// } from 'lucide-react';
 
 const ReportCard = ({ report }) => {
-  const user = JSON.parse(localStorage.getItem("user") || "{}");
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  const statusColors = {
+    "Pending": 'bg-yellow-100 text-yellow-800 border-yellow-200',
+    "Resolved": 'bg-green-100 text-green-800 border-green-200',
+    "Default": 'bg-gray-100 text-gray-800 border-gray-200'
+  };
+
+  const getStatusColor = (status) => statusColors[status] || statusColors.Default;
+
+  const formatDate = (dateString) => {
+    return new Date(dateString).toLocaleString('en-IN', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
+
+  const steps = [
+    { done: true, label: 'Reported' },
+    { done: report.Status !== 'Pending', label: 'In Review' },
+    { done: report.Status === 'Resolved', label: 'Resolved' }
+  ];
+
+  const mediaItems = [
+    { type: 'Video', link: report.VideoLink, icon: Video },
+    { type: 'Image', link: report.ImageLink, icon: Image },
+    { type: 'Audio', link: report.AudioLink, icon: Audio }
+  ];
 
   return (
-    <div className="bg-white p-4 rounded-md shadow-sm border border-gray-200 w-full hover:shadow-md transition-shadow mb-4">
-      {/* Title and Status */}
-      <div className="flex justify-between items-center mb-2">
-        <h3 className="text-lg font-medium text-gray-800 truncate">{report.Title}</h3>
-        <span
-          className={`px-3 py-0.5 rounded-full text-xs font-medium ${
-            report.Status === "Pending"
-              ? "bg-yellow-100 text-yellow-700"
-              : "bg-green-100 text-green-700"
-          }`}
-        >
-          {report.Status}
-        </span>
-      </div>
+    <Card className="w-full max-w-3xl mx-auto">
+      {/* Header Section */}
+      <div className="p-4 border-b">
+        <div className="flex items-start justify-between mb-2">
+          <div>
+            <h3 className="font-semibold text-gray-900">
+              {report.Title}
+            </h3>
+            <p className="text-xs text-gray-500">
+              Case ID: #{report._id.slice(-8)}
+            </p>
+          </div>
+          <Badge className={`${getStatusColor(report.Status)} px-2 py-1`}>
+            <AlertCircle className="w-3 h-3 mr-1" />
+            {report.Status}
+          </Badge>
+        </div>
 
-      {/* Description */}
-      <p className="text-sm text-gray-700 mb-3 truncate">{report.Description}</p>
-
-      {/* Details */}
-      <div className="space-y-2">
-        <div className="flex items-center text-sm text-gray-800">
-          <FaUser className="mr-1.5 text-gray-500" />
-          <span>
-            <strong>Harasser:</strong> {report.HarasserDetails}
-          </span>
-        </div>
-        <div className="flex items-center text-sm text-gray-800">
-          <FaFlag className="mr-1.5 text-gray-500" />
-          <span>
-            <strong>Reported To:</strong> {report.WhomToReport}
-          </span>
-        </div>
-        <div className="flex items-center text-sm text-gray-800">
-          <FaClock className="mr-1.5 text-gray-500" />
-          <span>
-            <strong>Time:</strong>{" "}
-            {report.Time.toLocaleString().split("T")[0]},{report.Time.toLocaleString().split("T")[1].split(".")[0]} {report.Time.toLocaleString().split("T")[1].split(".")[0].split(":")[0] >= 12 ? "PM" : "AM"}
-    </span>
-        </div>
-        <div className="flex items-center text-sm text-gray-800">
-          <FaClock className="mr-1.5 text-gray-500" />
-          <span>
-            <strong>Created At:</strong>{" "}
-            {new Date(report.createdAt).toLocaleString("en-IN", { timeZone: "Asia/Kolkata" })}
-          </span>
-        </div>
-        <div className="flex items-center text-sm text-gray-800">
-          <FaMapMarkerAlt className="mr-1.5 text-gray-500" />
-          <span>
-            <strong>Location (Live):</strong>{" "}
-            <a
-              href={`https://www.google.com/maps?q=${report.Location.latitude},${report.Location.longitude}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-blue-500 hover:underline"
-            >
-              {report.Location.latitude}, {report.Location.longitude}
-            </a>
-          </span>
-        </div>
-        <div className="flex items-center text-sm text-gray-800">
-          <FaMapMarkerAlt className="mr-1.5 text-gray-500" />
-          <span>
-            <strong>Location (Harassed): {report.h_location ? report.h_location : "Not Provided"} </strong>{" "}
-          </span>
+        {/* Progress Bar */}
+        <div className="flex items-center space-x-1 mt-3">
+          {steps.map((step, idx) => (
+            <React.Fragment key={idx}>
+              <div className={`h-1 flex-1 rounded transition-colors ${
+                step.done ? 'bg-green-500' : 'bg-gray-200'
+              }`} />
+              <div className={`w-2 h-2 rounded-full transition-colors ${
+                step.done ? 'bg-green-500' : 'bg-gray-200'
+              }`}>
+                {step.done && (
+                  <div className="absolute w-2 h-2 rounded-full animate-ping bg-green-500 opacity-75" />
+                )}
+              </div>
+            </React.Fragment>
+          ))}
         </div>
       </div>
 
-      {/* User Email */}
-      <div className="text-sm text-gray-600 mt-3">
-        {user?.college_email ? (
-          <span>
-            Updates will be sent to{" "}
-            <span className="font-medium text-gray-800">{user.college_email}</span>.
-          </span>
-        ) : (
-          <span className="text-red-500">User email not available.</span>
-        )}
+      {/* Main Content */}
+      <div className="p-4 space-y-4">
+        {/* Essential Info Grid */}
+        <div className="grid grid-cols-2 gap-3">
+          <InfoItem icon={Clock} label="Incident Time" value={formatDate(report.Time)} />
+          <InfoItem icon={Calendar} label="Reported On" value={formatDate(report.createdAt)} />
+          <InfoItem icon={User} label="Reported To" value={report.WhomToReport} />
+          <InfoItem icon={Flag} label="Harasser Details" value={report.HarasserDetails} />
+        </div>
+
+        {/* Description */}
+        <div className="bg-gray-50 p-3 rounded-lg">
+          <div className="flex items-center mb-1">
+            <FileText className="w-4 h-4 mr-2 text-gray-500" />
+            <span className="text-sm font-medium text-gray-700">Description</span>
+          </div>
+          <p className="text-sm text-gray-600 ml-6">
+            {report.Description}
+          </p>
+        </div>
+
+        {/* Location Details */}
+        <div className="space-y-2">
+          <div className="flex items-center space-x-2">
+            <MapPin className="w-4 h-4 text-gray-500" />
+            <span className="text-sm font-medium text-gray-700">Harassment Location:</span>
+            <span className="text-sm text-gray-600">{report.h_location}</span>
+          </div>
+          <a
+            href={`https://www.google.com/maps?q=${report.Location.latitude},${report.Location.longitude}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center text-sm text-blue-500 hover:underline ml-6"
+          >
+            <MapPin className="w-4 h-4 mr-1" />
+            View Live Location ({report.Location.latitude}, {report.Location.longitude})
+          </a>
+        </div>
       </div>
-    </div>
+    </Card>
   );
 };
+
+const InfoItem = ({ icon: Icon, label, value }) => (
+  <div className="flex items-start space-x-2">
+    <Icon className="w-4 h-4 text-gray-500 mt-0.5" />
+    <div>
+      <p className="text-xs text-gray-500">{label}</p>
+      <p className="text-sm text-gray-900">{value}</p>
+    </div>
+  </div>
+);
+

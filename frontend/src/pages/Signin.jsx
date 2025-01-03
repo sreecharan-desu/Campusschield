@@ -9,7 +9,6 @@ const Signin = () => {
     const [formData, setFormData] = useState({
         username: '',
         password: '',
-        // college_email: ''
     });
     const [forgotPasswordData, setForgotPasswordData] = useState({
         college_email: '',

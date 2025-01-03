@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AlertCircle, Bell, Download, Search, Trash2, MapPin, BarChart2 } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardContent } from '../components/ui/card';
+import { adminTokenState, adminDataState, sirenAlertsState } from '../store';
+import { useRecoilState } from 'recoil';
 
 // Skeleton Components
 const UserSkeleton = () => (
@@ -91,12 +93,11 @@ const AdminDashboard = () => {
   const [courseFilter, setCourseFilter] = useState('');
   const [yearFilter, setYearFilter] = useState('');
   const [sortBy, setSortBy] = useState('newest');
-
   const navigate = useNavigate();
-  const adminData = JSON.parse(localStorage.getItem('adminData') || '{}');
-  const token = localStorage.getItem('adminToken');
+  const [adminData, setAdminData] = useRecoilState(adminDataState);
   const API_BASE_URL = 'https://campus-schield-backend-api.vercel.app/api/v1/admin';
   let sirenAudio = new Audio('/siren.mp3');
+  const token = localStorage.getItem("adminToken");
 
   const fetchData = async () => {
     try {
@@ -132,24 +133,29 @@ const AdminDashboard = () => {
       const response = await fetch(`${API_BASE_URL}/getsirens`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-
+  
       if (!response.ok) {
         throw new Error('Failed to fetch sirens');
       }
-
+  
       const data = await response.json();
-      const prevAlerts = JSON.parse(localStorage.getItem('sirenAlerts') || '[]');
-
+  
       if (data.success) {
-        setSirenAlerts(data.sirens);
-
-        if (data.sirens.length > prevAlerts.length) {
+        // Retrieve the previous alert count from localStorage
+        const previousAlertCount = parseInt(localStorage.getItem('sirenAlertCount'), 10) || 0;
+  
+        // Get the current alert count from the fetched data
+        const currentAlertCount = data.sirens.length;
+  
+        // Check if there are new alerts
+        if (currentAlertCount > previousAlertCount) {
+          // Play sound only if the alert count has increased
           sirenAudio.loop = true;
           sirenAudio.play()
             .catch((error) => {
               console.error('Audio playback failed:', error);
             });
-
+  
           setTimeout(() => {
             if (!sirenAudio.paused) {
               sirenAudio.pause();
@@ -157,16 +163,19 @@ const AdminDashboard = () => {
             }
           }, 10000);
         }
+  
+        // Update the alert count in localStorage
+        localStorage.setItem('sirenAlertCount', currentAlertCount);
+  
+        // Update the alerts in state
+        setSirenAlerts(data.sirens);
       }
-
-      setTimeout(() => {
-        localStorage.setItem('sirenAlerts', JSON.stringify(data.sirens));
-      }, 2000);
-
     } catch (err) {
       console.error('Failed to fetch sirens:', err);
     }
   };
+  
+
 
   useEffect(() => {
     if (!token) {
@@ -257,8 +266,8 @@ const AdminDashboard = () => {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('adminToken');
-    localStorage.removeItem('adminData');
+    setToken(null);
+    setAdminData({});
     navigate('/admin/signin');
   };
 

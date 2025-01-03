@@ -9,9 +9,11 @@ import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import AdminDashboard from './pages/Admin';
 import AdminSignIn from './pages/AdminSIgnin';
 import DocsWebsite from './pages/Docs';
+import { RecoilRoot } from 'recoil';
 
 function App() {
     return (
+        <RecoilRoot>
         <BrowserRouter>
             <AnimatePresence mode="wait">
                 <Routes>
@@ -110,6 +112,7 @@ function App() {
                 </Routes>
             </AnimatePresence>
         </BrowserRouter>
+        </RecoilRoot>
     );
 }
 
