@@ -249,9 +249,6 @@ const Homepage = () => {
       return "Good Evening";
     };
     fetchReports();
-    setInterval(()=>{
-      fetchReports()
-    },5000);
     setGreeting(determineGreeting());
   }, []);
 
