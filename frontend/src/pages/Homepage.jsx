@@ -511,7 +511,7 @@ const ReportCard = ({ report }) => {
         <div className="flex items-center text-sm text-gray-800">
           <FaMapMarkerAlt className="mr-1.5 text-gray-500" />
           <span>
-            <strong>Location:</strong>{" "}
+            <strong>Location (Live):</strong>{" "}
             <a
               href={`https://www.google.com/maps?q=${report.Location.latitude},${report.Location.longitude}`}
               target="_blank"
@@ -519,6 +519,20 @@ const ReportCard = ({ report }) => {
               className="text-blue-500 hover:underline"
             >
               {report.Location.latitude}, {report.Location.longitude}
+            </a>
+          </span>
+        </div>
+        <div className="flex items-center text-sm text-gray-800">
+          <FaMapMarkerAlt className="mr-1.5 text-gray-500" />
+          <span>
+            <strong>Location (Harassed):</strong>{" "}
+            <a
+              href={`https://www.google.com/maps?q=${report.Location.latitude},${report.Location.longitude}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-500 hover:underline"
+            >
+              {report.h_location}
             </a>
           </span>
         </div>

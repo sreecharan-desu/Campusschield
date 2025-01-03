@@ -26,6 +26,7 @@ const Report = () => {
     const [formData, setFormData] = useState({
         title: '',
         description: '',
+        h_location: '',
         location: '',
         dateTime: '',
         harasser: '',
@@ -46,24 +47,23 @@ const Report = () => {
     const handleDetectLocation = async () => {
         try {
             const response = await fetch('https://ipapi.co/json/');
-            console.log(response)
             if (!response.ok) {
                 throw new Error('Failed to fetch location data');
             }
             const data = await response.json();
             const { latitude, longitude } = data;
-    
+
             if (latitude && longitude) {
                 const coords = `${latitude}, ${longitude}`;
                 setFormData((prevState) => ({ ...prevState, location: coords }));
-                setPopupMessage('Location detected successfully!');
+                setPopupMessage('Live location detected successfully!');
                 setPopupType('success');
                 setPopupVisible(true);
             } else {
                 throw new Error('Latitude and longitude not available.');
             }
         } catch (error) {
-            let errorMessage = 'Unable to get your location. Please try again.';
+            let errorMessage = 'Unable to get your live location. Please try again.';
             if (error.message) {
                 errorMessage = error.message;
             }
@@ -72,7 +72,6 @@ const Report = () => {
             setPopupVisible(true);
         }
     };
-    
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -108,6 +107,7 @@ const Report = () => {
                     title: '',
                     description: '',
                     location: '',
+                    h_location: '',
                     dateTime: '',
                     harasser: '',
                     whom_to_report: '',
@@ -125,49 +125,48 @@ const Report = () => {
 
     return (
         <div className="min-h-screen bg-gradient-to-b from-gray-100 to-white flex flex-col justify-between pb-16">
-<header className="bg-gradient-to-r from-blue-600 to-purple-600 text-white py-6 px-6 shadow-lg rounded-b-3xl">
-    <div className="flex items-center justify-between">
-        <button className="text-white text-lg focus:outline-none">
-            <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-6 w-6"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth="2"
-            >
-                <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M4 6h16M4 12h8m-8 6h16"
-                />
-            </svg>
-        </button>
-        <h1 className="text-3xl font-bold tracking-wide text-center">
-            Report Incident
-        </h1>
-        <button className="text-white text-lg focus:outline-none">
-            <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-6 w-6"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth="2"
-            >
-                <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M5 13l4 4L19 7"
-                />
-            </svg>
-        </button>
-    </div>
-    <p className="text-sm text-white opacity-90 mt-2 text-center">
-        Fill out the form below to report any incident.
-    </p>
-</header>
-
+            <header className="bg-gradient-to-r from-blue-600 to-purple-600 text-white py-6 px-6 shadow-lg rounded-b-3xl">
+                <div className="flex items-center justify-between">
+                    <button className="text-white text-lg focus:outline-none">
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="h-6 w-6"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                        >
+                            <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                d="M4 6h16M4 12h8m-8 6h16"
+                            />
+                        </svg>
+                    </button>
+                    <h1 className="text-3xl font-bold tracking-wide text-center">
+                        Report Incident
+                    </h1>
+                    <button className="text-white text-lg focus:outline-none">
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="h-6 w-6"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                        >
+                            <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                d="M5 13l4 4L19 7"
+                            />
+                        </svg>
+                    </button>
+                </div>
+                <p className="text-sm text-white opacity-90 mt-2 text-center">
+                    Fill out the form below to report any incident.
+                </p>
+            </header>
 
             <main className="flex-1 px-4 py-6">
                 <div className="bg-white shadow-md rounded-xl p-6">
@@ -197,7 +196,19 @@ const Report = () => {
                             ></textarea>
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-gray-700">Location</label>
+                            <label className="block text-sm font-medium text-gray-700">Harassment Location</label>
+                            <input
+                                type="text"
+                                name="h_location"
+                                value={formData.h_location}
+                                onChange={handleInputChange}
+                                className="w-full mt-2 p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                placeholder="Enter location of harassment"
+                                required
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700">Live Location</label>
                             <div className="flex mt-2 gap-2">
                                 <input
                                     type="text"

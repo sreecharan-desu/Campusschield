@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { DocumentTextIcon } from '@heroicons/react/20/solid';
-import { Loader2, AlertCircle, Bell, Download, Search, Trash2, MapPin, Pointer, Salad } from 'lucide-react';
+import { AlertCircle, Bell, Download, Search, Trash2, MapPin, BarChart2 } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardContent } from '../components/ui/card';
 
 // Skeleton Components
