@@ -266,7 +266,9 @@ const AdminDashboard = () => {
   };
 
   const handleLogout = () => {
-    setToken(null);
+    localStorage.removeItem("adminToken");
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
     setAdminData({});
     navigate('/admin/signin');
   };
@@ -412,7 +414,7 @@ const AdminDashboard = () => {
                 className="h-10 w-10"
               />
               <h1 className="text-2xl font-bold text-white">
-                Campus Shield <sup className='text-sm bg-white px-3 py-1 text-black rounded-full'>{adminData.username}</sup>
+                Campus Shield <sup className='bg-white px-2 py-0.5 text-black rounded-full'>{adminData.username}</sup>
               </h1>
             </div>
 
