@@ -525,15 +525,7 @@ const ReportCard = ({ report }) => {
         <div className="flex items-center text-sm text-gray-800">
           <FaMapMarkerAlt className="mr-1.5 text-gray-500" />
           <span>
-            <strong>Location (Harassed):</strong>{" "}
-            <a
-              href={`https://www.google.com/maps?q=${report.Location.latitude},${report.Location.longitude}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-blue-500 hover:underline"
-            >
-              {report.h_location}
-            </a>
+            <strong>Location (Harassed): {report.h_location ? report.h_location : "Not Provided"} </strong>{" "}
           </span>
         </div>
       </div>

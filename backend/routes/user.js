@@ -220,7 +220,7 @@ userRouter.post('/getreports', auth_user, async (req, res) => {
 
 //(post -endpoints)
 userRouter.post('/createreport', validateReport, auth_user, async (req, res) => {
-    const { title, description, location, dateTime, harasser, video_link, image_link, audio_link, whom_to_report } = req.body;
+    const { title, description, location,h_location,dateTime, harasser, video_link, image_link, audio_link, whom_to_report } = req.body;
 
     try {
         const authorization = req.headers.authorization;
@@ -242,6 +242,7 @@ userRouter.post('/createreport', validateReport, auth_user, async (req, res) => 
 
         const report = await Report.create({
             userId: Current_user._id,
+            h_location : h_location,
             Title: title,
             Description: description,
             Status: 'Pending',
@@ -254,6 +255,9 @@ userRouter.post('/createreport', validateReport, auth_user, async (req, res) => 
             WhomToReport: whom_to_report || 'Unknown'
         });
 
+
+
+        // console.log(report)
 
         const transporter = nodemailer.createTransport({
             service: 'gmail',

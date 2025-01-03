@@ -139,6 +139,7 @@ const reportsSchema = new mongoose.Schema({
         ref: 'User',
         required: true
     },
+    h_location : String,
     Title: {
         type: String,
         default: 'Title'

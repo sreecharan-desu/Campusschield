@@ -14,11 +14,12 @@ const reportValidationSchema = z.object({
     video_link: z.string().default('No Video'),
     image_link: z.string().default('No Image'),
     audio_link: z.string().default('No Audio'),
-    whom_to_report: z.string().default('Unknown')
+    whom_to_report: z.string().default('Unknown'),
+    h_location : z.string().default('unknown')
 });
 
 const validateReport = (req, res, next) => {
-    const { title, description, location, dateTime, harasser, video_link, image_link, audio_link, whom_to_report } = req.body;
+    const { title, description, location, dateTime, harasser, video_link, image_link, audio_link, whom_to_report,h_location } = req.body;
     
     try {
         const validation = reportValidationSchema.safeParse({
@@ -32,7 +33,8 @@ const validateReport = (req, res, next) => {
             video_link,
             image_link,
             audio_link,
-            whom_to_report
+            whom_to_report,
+            h_location
         });
         if (validation.success) next();
         else {
