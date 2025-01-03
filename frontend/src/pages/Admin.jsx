@@ -629,92 +629,110 @@ const AdminDashboard = () => {
 
           {/* Reports View */}
           {view === 'reports' && (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {getFilteredData(
-                reports.filter(
-                  report =>
-                    report.WhomToReport ===
-                    (adminData.username === "Police" ? "police" : "women_organization")
-                ),
-                'reports'
-              ).map((report) => (
-                <Card key={report._id} className="hover:shadow-lg transition-shadow duration-300">
-                  <CardHeader>
-                    <div className="flex justify-between items-start">
-                      <CardTitle className="text-lg font-semibold">
-                        {report.Title}{" "}
-                        <b style={{ fontSize: "10px" }} className="text-sm text-gray">
-                          id_{report._id}
-                        </b>
-                      </CardTitle>
-                      <span
-                        className={`px-2 py-1 text-xs font-semibold rounded-full ${
-                          report.Status === "Resolved"
-                            ? "bg-green-100 text-green-800"
-                            : "bg-yellow-100 text-yellow-800"
-                        }`}
-                      >
-                        {report.Status}
-                      </span>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      <p className="text-sm text-gray-600">{report.Description}</p>
-                      <p className="text-sm text-gray-600 italic bold">
-                        {report.HarasserDetails}
-                      </p>
-                      <div className="space-y-2">
-                        <div className="flex items-center space-x-2 text-sm">
-                          <MapPin className="h-4 w-4 text-gray-400" />
-                          <a
-                            href={`https://www.google.com/maps?q=${report.Location.latitude},${report.Location.longitude}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-blue-500 hover:underline"
-                          >
-                            View Location
-                          </a>
-                        </div>
-                        <p className="text-sm">
-                          <span className="font-medium">Reported:</span>{" "}
-                          {new Date(report.createdAt).toLocaleString()}
-                        </p>
-                        <p className="text-sm">
-                          <span className="font-medium">userId : </span>{" "}
-                          <b style={{ fontSize: "10px" }} className="text-sm text-gray">
-                            id_{report.userId}
-                          </b>
-                        </p>
-                        <span className="font-medium text-xs italic text-gray-700 bg-yellow-300 px-1 py-0.5 rounded-full">
-                          reported to {adminData.username.toLowerCase()}
-                        </span>
-                      </div>
-                      <div className="flex justify-between pt-4">
-                        <button
-                          onClick={() => handleStatusChange(report._id, "Resolved")}
-                          className={`px-3 py-1 rounded-md text-sm font-medium ${
-                            report.Status === "Resolved"
-                              ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                              : "bg-green-500 text-white hover:bg-green-600"
-                          }`}
-                          disabled={report.Status === "Resolved"}
-                        >
-                          Mark Resolved
-                        </button>
-                        <button
-                          onClick={() => handleDeleteReport(report._id)}
-                          className="px-3 py-1 bg-red-100 text-red-600 rounded-md text-sm font-medium hover:bg-red-200"
-                        >
-                          Delete
-                        </button>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
+  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    {getFilteredData(
+      reports.filter((report) => {
+        if (adminData.username === "SreeCharan") {
+          return true; // Display all reports
+        } else if (adminData.username === "Police") {
+          return report.WhomToReport === "police";
+        } else if (adminData.username === "WomenOrg") {
+          return report.WhomToReport === "women_organization";
+        }
+        return false; // Default case, no reports
+      }),
+      'reports'
+    ).map((report) => (
+      <Card key={report._id} className="hover:shadow-lg transition-shadow duration-300">
+        <CardHeader>
+          <div className="flex justify-between items-start">
+            <CardTitle className="text-lg font-semibold">
+              {report.Title}{" "}
+              <b style={{ fontSize: "10px" }} className="text-sm text-gray">
+                id_{report._id}
+              </b>
+            </CardTitle>
+            <span
+              className={`px-2 py-1 text-xs font-semibold rounded-full ${
+                report.Status === "Resolved"
+                  ? "bg-green-100 text-green-800"
+                  : "bg-yellow-100 text-yellow-800"
+              }`}
+            >
+              {report.Status}
+            </span>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            <p className="text-sm text-gray-600">{report.Description}</p>
+            <p className="text-sm text-gray-600 italic bold">
+              {report.HarasserDetails}
+            </p>
+            <div className="space-y-2">
+              <div className="flex items-center space-x-2 text-sm">
+                <MapPin className="h-4 w-4 text-gray-400" />
+                <a
+                  href={`https://www.google.com/maps?q=${report.Location.latitude},${report.Location.longitude}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-500 hover:underline"
+                >
+                  View Location
+                </a>
+              </div>
+              <div className="flex items-center text-xs">
+                <MapPin className="h-4 w-4 text-gray-400" />
+                <span className='font-bold italic p-1'>
+                Location Harassed : {report.h_location ? report.h_location : "Not provided"}
+                </span>
+              </div>
+              <p className="text-sm">
+                <span className="font-medium">Reported:</span>{" "}
+                {new Date(report.createdAt).toLocaleString()}
+              </p>
+              <p className="text-sm">
+                <span className="font-medium">userId : </span>{" "}
+                <b style={{ fontSize: "10px" }} className="text-sm text-gray">
+                  id_{report.userId}
+                </b>
+              </p>
+              <span className="font-medium text-xs italic text-gray-700 bg-yellow-300 px-1 py-0.5 rounded-full">
+  reported to{" "}
+  {report.WhomToReport === "police"
+    ? "police"
+    : report.WhomToReport === "women_organization"
+    ? "women organization"
+    : "Admin"}
+</span>
+
             </div>
-          )}
+            <div className="flex justify-between pt-4">
+              <button
+                onClick={() => handleStatusChange(report._id, "Resolved")}
+                className={`px-3 py-1 rounded-md text-sm font-medium ${
+                  report.Status === "Resolved"
+                    ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                    : "bg-green-500 text-white hover:bg-green-600"
+                }`}
+                disabled={report.Status === "Resolved"}
+              >
+                Mark Resolved
+              </button>
+              <button
+                onClick={() => handleDeleteReport(report._id)}
+                className="px-3 py-1 bg-red-100 text-red-600 rounded-md text-sm font-medium hover:bg-red-200"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    ))}
+  </div>
+)}
+
 
           {/* Sirens View */}
           {view === 'sirens' && (
@@ -780,7 +798,7 @@ const AdminDashboard = () => {
                           <Bell className="h-4 w-4" />
                           <span>Emergency Siren</span>
                         </button>
-                        <button
+                        {/* <button
                           onClick={() => {
                             // Handle alert deletion
                             setError('Alert deletion not implemented');
@@ -789,7 +807,7 @@ const AdminDashboard = () => {
                         >
                           <Trash2 className="h-4 w-4" />
                           <span>Delete</span>
-                        </button>
+                        </button> */}
                       </div>
                     </div>
                   </CardContent>
