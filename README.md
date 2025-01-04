@@ -1,7 +1,7 @@
-# CampusShield-Backend
+# CampusShied
 
 ## Overview
-CampusShield-Backend is a backend service for managing campus security operations. It provides APIs for user authentication, incident reporting, and real-time notifications.
+CampusShield is a service for managing campus security operations. It provides APIs for user authentication, incident reporting, and real-time notifications.
 
 ## Features
 - User Authentication
