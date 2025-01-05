@@ -38,10 +38,10 @@ Scan the QR code below to download the app:
 [![QR Code to Download](https://drive.google.com/uc?export=view&id=1IfVs4BKUBweCsadXVLWxADiYIllqJkO3)](https://drive.google.com/file/d/1IfVs4BKUBweCsadXVLWxADiYIllqJkO3/view?usp=drivesdk)
 
 ## 🛠️ Tech Stack  
-- **Frontend:** [Your chosen framework/library]  
-- **Backend:** [Backend framework, e.g., Node.js, Django]  
-- **Database:** [Database system, e.g., MongoDB, Firebase]  
-- **APIs:** [Any external APIs used]  
+- **Frontend:** React + Recoil + Tailwind  
+- **Backend:** Nodejs , Express 
+- **Database:** MongoDB
+- **APIs:** Location Tracking by IP API
 
 ---
 
