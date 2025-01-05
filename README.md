@@ -31,6 +31,12 @@ The app is designed to empower users at every stage of harassment, offering acce
 
 ---
 
+## 📥 Download the App  
+
+Scan the QR code below to download the app:  
+
+[![QR Code to Download](https://drive.google.com/uc?export=view&id=1IfVs4BKUBweCsadXVLWxADiYIllqJkO3)](https://drive.google.com/file/d/1IfVs4BKUBweCsadXVLWxADiYIllqJkO3/view?usp=drivesdk)
+
 ## 🛠️ Tech Stack  
 - **Frontend:** [Your chosen framework/library]  
 - **Backend:** [Backend framework, e.g., Node.js, Django]  
