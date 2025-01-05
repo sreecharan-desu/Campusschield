@@ -1,60 +1,77 @@
-# CampusShied
+# Women Harassment Prevention and Support App  
 
-## Overview
-CampusShield is a service for managing campus security operations. It provides APIs for user authentication, incident reporting, and real-time notifications.
+## 🚀 Project Overview  
+This project aims to tackle the critical issue of **women harassment** by providing a comprehensive mobile application that ensures **awareness**, **immediate response**, and **post-incident support** for victims.  
 
-## Features
-- User Authentication
-- Incident Reporting
-- Real-time Notifications
-- Role-based Access Control
+The app is designed to empower users at every stage of harassment, offering accessible tools, resources, and reporting mechanisms to create a safer environment for women.  
 
-## Installation
-1. Clone the repository:
-    ```bash
-    git clone https://github.com/yourusername/CampusShield-Backend.git
-    ```
-2. Navigate to the project directory:
-    ```bash
-    cd CampusShield-Backend
-    ```
-3. Install dependencies:
-    ```bash
-    npm install
-    ```
+---
 
-## Usage
-1. Start the development server:
-    ```bash
-    npm start
-    ```
-2. The server will be running at `http://localhost:3000`.
+## 🌟 Key Features  
 
-## API Endpoints
-- `POST /api/auth/login` - User login
-- `POST /api/auth/register` - User registration
-- `GET /api/incidents` - Get all incidents
-- `POST /api/incidents` - Report a new incident
+### **Phase 1: Awareness and Prevention**  
+- **Educational Resources:**  
+  - Helpline numbers for immediate support.  
+  - Articles and embedded YouTube videos for empowerment and awareness.  
+- **Pre-installation Awareness:**  
+  - Collaboration with authorities to educate and promote app usage.  
 
-## Contributing
-1. Fork the repository.
-2. Create a new branch:
-    ```bash
-    git checkout -b feature-branch
-    ```
-3. Make your changes and commit them:
-    ```bash
-    git commit -m "Description of changes"
-    ```
-4. Push to the branch:
-    ```bash
-    git push origin feature-branch
-    ```
-5. Create a pull request.
+### **Phase 2: Immediate Action During Harassment**  
+- **Alert System:**  
+  - A **visible alert button** on the homepage triggers loud alerts to attract attention.  
+  - Sends notifications to admins (police, women’s organizations).  
+- **Future Integrations:**  
+  - Planned linkage with official email systems of law enforcement and women’s organizations.  
 
-## License
-This project is licensed under the MIT License.
+### **Phase 3: Post-Harassment Support**  
+- **Anonymous Complaint Reporting:**  
+  - Victims can file complaints against harassers, including higher officials and faculty.  
+- **Report Tracking:**  
+  - Users can track complaint status, with updates sent to their email.  
 
-## Contact
-For any inquiries, please contact.
-sreecharan309@gmail.com
+---
+
+## 🛠️ Tech Stack  
+- **Frontend:** [Your chosen framework/library]  
+- **Backend:** [Backend framework, e.g., Node.js, Django]  
+- **Database:** [Database system, e.g., MongoDB, Firebase]  
+- **APIs:** [Any external APIs used]  
+
+---
+
+## 🚧 Project Roadmap  
+1. **Initial Development:**  
+   - Build core features for all three phases.  
+2. **Testing and Feedback:**  
+   - Collaborate with users to test functionality and gather feedback.  
+3. **Integration with Authorities:**  
+   - Establish partnerships with law enforcement and women’s organizations.  
+4. **Launch and Outreach:**  
+   - Release the app and promote awareness through campaigns.  
+
+---
+
+## 🤝 Contribution Guidelines  
+We welcome contributions to make this project better! Here's how you can contribute:  
+1. Fork the repository.  
+2. Create a new branch (`feature/your-feature-name`).  
+3. Commit your changes.  
+4. Push the branch and open a pull request.  
+
+---
+
+## 📄 License  
+This project is licensed under the **[MIT License](LICENSE)**.  
+
+---
+
+## 💡 Inspiration  
+This app was inspired by the need to create a safer environment for women, addressing both immediate and long-term challenges related to harassment.  
+
+---
+
+## 📬 Contact  
+For queries or suggestions, please reach out to:  
+- **Name:** Sreecharan  
+- **Email:** [sreecharan309@gmail.com](mailto:sreecharan309@gmail.com)  
+- **GitHub:** [@sreecharan-desu](https://github.com/sreecharan-desu)
